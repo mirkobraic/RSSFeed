@@ -9,13 +9,18 @@
 /* Begin PBXBuildFile section */
 		965465FD2B38F56500125226 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965465FC2B38F56500125226 /* AppDelegate.swift */; };
 		965465FF2B38F56500125226 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965465FE2B38F56500125226 /* SceneDelegate.swift */; };
-		965466012B38F56500125226 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965466002B38F56500125226 /* ViewController.swift */; };
-		965466042B38F56500125226 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965466022B38F56500125226 /* Main.storyboard */; };
+		965466012B38F56500125226 /* FeedListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965466002B38F56500125226 /* FeedListViewController.swift */; };
 		965466062B38F56800125226 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 965466052B38F56800125226 /* Assets.xcassets */; };
 		965466092B38F56800125226 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965466072B38F56800125226 /* LaunchScreen.storyboard */; };
 		965466142B38F56800125226 /* RSSFeedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965466132B38F56800125226 /* RSSFeedTests.swift */; };
 		9654661E2B38F56800125226 /* RSSFeedUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654661D2B38F56800125226 /* RSSFeedUITests.swift */; };
 		965466202B38F56800125226 /* RSSFeedUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654661F2B38F56800125226 /* RSSFeedUITestsLaunchTests.swift */; };
+		965466372B39044D00125226 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 965466362B39044D00125226 /* Then */; };
+		9654663A2B39050600125226 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 965466392B39050600125226 /* SnapKit */; };
+		9654663C2B3905A200125226 /* Coordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654663B2B3905A200125226 /* Coordinator.swift */; };
+		9654663E2B3905B700125226 /* MainCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654663D2B3905B700125226 /* MainCoordinator.swift */; };
+		965466412B39066800125226 /* FeedListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965466402B39066800125226 /* FeedListViewModel.swift */; };
+		965466452B39088200125226 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 965466442B39088200125226 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,8 +44,7 @@
 		965465F92B38F56500125226 /* RSSFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RSSFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965465FC2B38F56500125226 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965465FE2B38F56500125226 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		965466002B38F56500125226 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		965466032B38F56500125226 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		965466002B38F56500125226 /* FeedListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewController.swift; sourceTree = "<group>"; };
 		965466052B38F56800125226 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		965466082B38F56800125226 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9654660A2B38F56800125226 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -49,6 +53,9 @@
 		965466192B38F56800125226 /* RSSFeedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RSSFeedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9654661D2B38F56800125226 /* RSSFeedUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedUITests.swift; sourceTree = "<group>"; };
 		9654661F2B38F56800125226 /* RSSFeedUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		9654663B2B3905A200125226 /* Coordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinator.swift; sourceTree = "<group>"; };
+		9654663D2B3905B700125226 /* MainCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCoordinator.swift; sourceTree = "<group>"; };
+		965466402B39066800125226 /* FeedListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +63,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				965466452B39088200125226 /* Kingfisher in Frameworks */,
+				965466372B39044D00125226 /* Then in Frameworks */,
+				9654663A2B39050600125226 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +93,7 @@
 				965466122B38F56800125226 /* RSSFeedTests */,
 				9654661C2B38F56800125226 /* RSSFeedUITests */,
 				965465FA2B38F56500125226 /* Products */,
+				965466382B39050600125226 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -99,13 +110,14 @@
 		965465FB2B38F56500125226 /* RSSFeed */ = {
 			isa = PBXGroup;
 			children = (
-				965465FC2B38F56500125226 /* AppDelegate.swift */,
-				965465FE2B38F56500125226 /* SceneDelegate.swift */,
-				965466002B38F56500125226 /* ViewController.swift */,
-				965466022B38F56500125226 /* Main.storyboard */,
-				965466052B38F56800125226 /* Assets.xcassets */,
-				965466072B38F56800125226 /* LaunchScreen.storyboard */,
-				9654660A2B38F56800125226 /* Info.plist */,
+				9654662C2B38F8FD00125226 /* AppStart */,
+				9654662D2B38F92500125226 /* Resources */,
+				965466302B3900C900125226 /* Extensions */,
+				9654662F2B3900BF00125226 /* Coordinators */,
+				965466322B3900F200125226 /* Endpoints */,
+				965466312B3900EA00125226 /* Services */,
+				965466332B39011C00125226 /* Models */,
+				9654662E2B3900B600125226 /* Scenes */,
 			);
 			path = RSSFeed;
 			sourceTree = "<group>";
@@ -127,6 +139,94 @@
 			path = RSSFeedUITests;
 			sourceTree = "<group>";
 		};
+		9654662C2B38F8FD00125226 /* AppStart */ = {
+			isa = PBXGroup;
+			children = (
+				965465FC2B38F56500125226 /* AppDelegate.swift */,
+				965465FE2B38F56500125226 /* SceneDelegate.swift */,
+				965466072B38F56800125226 /* LaunchScreen.storyboard */,
+			);
+			path = AppStart;
+			sourceTree = "<group>";
+		};
+		9654662D2B38F92500125226 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				965466052B38F56800125226 /* Assets.xcassets */,
+				9654660A2B38F56800125226 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9654662E2B3900B600125226 /* Scenes */ = {
+			isa = PBXGroup;
+			children = (
+				9654663F2B39064700125226 /* FeedList */,
+				965466422B3907DE00125226 /* FeedDetails */,
+			);
+			path = Scenes;
+			sourceTree = "<group>";
+		};
+		9654662F2B3900BF00125226 /* Coordinators */ = {
+			isa = PBXGroup;
+			children = (
+				9654663B2B3905A200125226 /* Coordinator.swift */,
+				9654663D2B3905B700125226 /* MainCoordinator.swift */,
+			);
+			path = Coordinators;
+			sourceTree = "<group>";
+		};
+		965466302B3900C900125226 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		965466312B3900EA00125226 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		965466322B3900F200125226 /* Endpoints */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Endpoints;
+			sourceTree = "<group>";
+		};
+		965466332B39011C00125226 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		965466382B39050600125226 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9654663F2B39064700125226 /* FeedList */ = {
+			isa = PBXGroup;
+			children = (
+				965466002B38F56500125226 /* FeedListViewController.swift */,
+				965466402B39066800125226 /* FeedListViewModel.swift */,
+			);
+			path = FeedList;
+			sourceTree = "<group>";
+		};
+		965466422B3907DE00125226 /* FeedDetails */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = FeedDetails;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -143,6 +243,11 @@
 			dependencies = (
 			);
 			name = RSSFeed;
+			packageProductDependencies = (
+				965466362B39044D00125226 /* Then */,
+				965466392B39050600125226 /* SnapKit */,
+				965466442B39088200125226 /* Kingfisher */,
+			);
 			productName = RSSFeed;
 			productReference = 965465F92B38F56500125226 /* RSSFeed.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +320,11 @@
 				Base,
 			);
 			mainGroup = 965465F02B38F56500125226;
+			packageReferences = (
+				965466342B39037500125226 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				965466352B39044D00125226 /* XCRemoteSwiftPackageReference "Then" */,
+				965466432B39088200125226 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			productRefGroup = 965465FA2B38F56500125226 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -233,7 +343,6 @@
 			files = (
 				965466092B38F56800125226 /* LaunchScreen.storyboard in Resources */,
 				965466062B38F56800125226 /* Assets.xcassets in Resources */,
-				965466042B38F56500125226 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,8 +367,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				965466012B38F56500125226 /* ViewController.swift in Sources */,
+				9654663C2B3905A200125226 /* Coordinator.swift in Sources */,
+				965466012B38F56500125226 /* FeedListViewController.swift in Sources */,
 				965465FD2B38F56500125226 /* AppDelegate.swift in Sources */,
+				9654663E2B3905B700125226 /* MainCoordinator.swift in Sources */,
+				965466412B39066800125226 /* FeedListViewModel.swift in Sources */,
 				965465FF2B38F56500125226 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -297,14 +409,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		965466022B38F56500125226 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				965466032B38F56500125226 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		965466072B38F56800125226 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -447,9 +551,9 @@
 				INFOPLIST_FILE = RSSFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -475,9 +579,9 @@
 				INFOPLIST_FILE = RSSFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -607,6 +711,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		965466342B39037500125226 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.0;
+			};
+		};
+		965466352B39044D00125226 /* XCRemoteSwiftPackageReference "Then" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/Then.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		965466432B39088200125226 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		965466362B39044D00125226 /* Then */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 965466352B39044D00125226 /* XCRemoteSwiftPackageReference "Then" */;
+			productName = Then;
+		};
+		965466392B39050600125226 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 965466342B39037500125226 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		965466442B39088200125226 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 965466432B39088200125226 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 965465F12B38F56500125226 /* Project object */;
 }
