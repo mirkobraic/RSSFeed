@@ -7,16 +7,18 @@
 
 import Foundation
 
-struct RssFeed: Hashable {
+class RssFeed: Identifiable {
+    let id = UUID()
     var url: String
     var isFavorite: Bool
 
-    var imageUrl: URL?
-    var title: String?
-    var desc: String?
+    var imageUrl: String = ""
+    var title: String = ""
+    var description: String = ""
     var items: [RssItem] = []
 
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(url)
+    init(url: String, isFavorite: Bool = false) {
+        self.url = url
+        self.isFavorite = isFavorite
     }
 }

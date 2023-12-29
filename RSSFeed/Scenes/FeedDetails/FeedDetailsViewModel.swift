@@ -10,7 +10,7 @@ import Combine
 
 extension FeedDetailsViewModel {
     enum Input {
-        case feedItemTapped(RssItem)
+        case feedItemTapped(RssItem.ID)
     }
 
     struct Output {
@@ -38,13 +38,19 @@ class FeedDetailsViewModel {
         input.sink { [weak self] input in
             guard let self else { return }
             switch input {
-            case .feedItemTapped(let item):
-                coordinator?.openUrl(item.link)
+            case .feedItemTapped(let itemId):
+                if let item = getItem(withId: itemId) {
+                    coordinator?.openUrl(item.link)
+                }
             }
         }
         .store(in: &subscriptions)
 
         let output = Output(feedUpdated: subjects.feedUpdated.eraseToAnyPublisher())
         return output
+    }
+
+    func getItem(withId id: RssItem.ID) -> RssItem? {
+        return feed.items.first { $0.id == id }
     }
 }

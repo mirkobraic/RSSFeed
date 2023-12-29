@@ -10,16 +10,16 @@ import Combine
 import Then
 
 class FeedDetailsViewController: UIViewController {
-    typealias DataSource = UICollectionViewDiffableDataSource<String, RssItem>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<String, RssItem>
+    typealias DataSource = UICollectionViewDiffableDataSource<String, RssItem.ID>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<String, RssItem.ID>
 
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.list)
+    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.list())
     private let noStoriesLabel = UILabel().then {
         $0.text = "No stories in the current feed."
         $0.isHidden = true
         $0.textAlignment = .center
         $0.textColor = .secondaryLabel
-        $0.font = UIFont.preferredFont(forTextStyle: .title2)
+        $0.font = UIFont.preferredFont(forTextStyle: .title3)
     }
 
     private var subscriptions = Set<AnyCancellable>()
@@ -44,7 +44,12 @@ class FeedDetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .systemBackground
+        navigationItem.largeTitleDisplayMode = .never
+
+        collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: UICollectionViewListCell.defaultReuseIdentifier)
+        collectionView.delegate = self
+        
+        initializeDataSource()
         bindToViewModel()
     }
 
@@ -64,7 +69,7 @@ class FeedDetailsViewController: UIViewController {
     private func applySnapshot(for items: [RssItem]) {
         var snapshot = Snapshot()
         snapshot.appendSections(["single"])
-        snapshot.appendItems(items)
+        snapshot.appendItems(items.map { $0.id })
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
@@ -73,8 +78,8 @@ class FeedDetailsViewController: UIViewController {
 extension FeedDetailsViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        if let item = dataSource.itemIdentifier(for: indexPath) {
-            input.send(.feedItemTapped(item))
+        if let id = dataSource.itemIdentifier(for: indexPath) {
+            input.send(.feedItemTapped(id))
         }
     }
 }
@@ -94,14 +99,10 @@ extension FeedDetailsViewController {
     }
 
     private func initializeDataSource() {
-        dataSource = DataSource(collectionView: collectionView) { collectionView, indexPath, rssItem in
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UICollectionViewListCell.defaultReuseIdentifier, for: indexPath)
-
-            var content = UIListContentConfiguration.cell()
-            content.text = rssItem.title
-            cell.contentConfiguration = content
-
-            return cell
+        let cellRegistration = CellRegistrations.feedItemListCell()
+        dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, rssItemId in
+            let rssItem = self?.viewModel.getItem(withId: rssItemId)
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: rssItem)
         }
     }
 }

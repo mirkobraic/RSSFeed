@@ -8,9 +8,11 @@
 import UIKit
 
 class CompositionalLayouts {
-    static var list: UICollectionViewCompositionalLayout = {
+    private init() { }
+
+    static func list() -> UICollectionViewCompositionalLayout {
         let configuration = UICollectionLayoutListConfiguration(appearance: .plain)
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         return layout
-    }()
+    }
 }

@@ -9,7 +9,7 @@ import UIKit
 
 extension MainCoordinator {
     struct Dependencies {
-        let networkService = NetworkService()
+        let rssParser = RSSParser()
         let feedStorage = RssFeedFileRepository()
     }
 }
@@ -26,7 +26,7 @@ class MainCoordinator: Coordinator {
     }
 
     func start() {
-        let vm = FeedListViewModel(networkService: dependencies.networkService,
+        let vm = FeedListViewModel(rssParser: dependencies.rssParser,
                                    feedStorage: dependencies.feedStorage)
         vm.coordinator = self
         let vc = FeedListViewController(viewModel: vm)

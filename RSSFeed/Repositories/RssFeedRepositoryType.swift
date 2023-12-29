@@ -8,8 +8,8 @@
 import Foundation
 
 protocol RssFeedRepositoryType {
-    func getRssFeeds() throws -> [RssFeed]
-    func saveRssFeeds(_ feeds: [RssFeed]) throws
-    func insertRssFeed(_ feed: RssFeed) throws
-    func deleteRssFeed(_ feed: RssFeed) throws
+    func getRssFeeds() throws -> [RssFeedStorageModel]
+    func saveRssFeeds(_ feeds: [RssFeedStorageModel]) throws
+    func insertRssFeed(_ feed: RssFeedStorageModel) throws
+    func deleteRssFeed(_ feed: RssFeedStorageModel) throws
 }

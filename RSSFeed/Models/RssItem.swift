@@ -7,9 +7,13 @@
 
 import Foundation
 
-struct RssItem: Codable, Hashable {
-    let title: String
-    let link: String
-    let categories: [String]
-    let description: String
+class RssItem: Identifiable {
+    let id = UUID()
+    var title: String = ""
+    var link: String = ""
+    var categories: [String] = []
+    var description = ""
+    var attributedDescription: NSMutableAttributedString?
+    var publicationDate: String = ""
+    var imageUrl: String = ""
 }
