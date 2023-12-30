@@ -9,8 +9,9 @@ import UIKit
 
 extension MainCoordinator {
     struct Dependencies {
-        let rssParser = RSSParser()
-        let feedStorage = RssFeedFileRepository()
+        let networkService: NetworkService
+        let rssParser: RSSParser
+        let feedStorage: RssFeedRepositoryType
     }
 }
 
@@ -22,7 +23,13 @@ class MainCoordinator: Coordinator {
 
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
-        self.dependencies = Dependencies()
+
+        let networkService = NetworkService()
+        let rssParser = RSSParser(networkService: networkService)
+        let feedStorage = RssFeedFileRepository()
+        self.dependencies = Dependencies(networkService: networkService,
+                                         rssParser: rssParser,
+                                         feedStorage: feedStorage)
     }
 
     func start() {
@@ -49,7 +56,7 @@ class MainCoordinator: Coordinator {
     }
 
     func openFeedDetails(for feed: RssFeed) {
-        let vm = FeedDetailsViewModel(feed: feed)
+        let vm = FeedDetailsViewModel(feed: feed, rssParser: dependencies.rssParser)
         vm.coordinator = self
         let vc = FeedDetailsViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)

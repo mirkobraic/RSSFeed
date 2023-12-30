@@ -21,6 +21,7 @@ class FeedDetailsViewController: UIViewController {
         $0.textColor = .secondaryLabel
         $0.font = UIFont.preferredFont(forTextStyle: .title3)
     }
+    private let activityIndicator = UIActivityIndicatorView()
 
     private var subscriptions = Set<AnyCancellable>()
     private let input = PassthroughSubject<FeedDetailsViewModel.Input, Never>()
@@ -60,8 +61,36 @@ class FeedDetailsViewController: UIViewController {
             .sink { [weak self] feed in
                 guard let self, let feed else { return }
                 title = feed.title
-                noStoriesLabel.isHidden = !feed.items.isEmpty
-                applySnapshot(for: feed.items)
+                if let items = feed.items {
+                    noStoriesLabel.isHidden = !items.isEmpty
+                    applySnapshot(for: items)
+                } else {
+                    noStoriesLabel.isHidden = true
+                }
+            }
+            .store(in: &subscriptions)
+
+        output.loadingData
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self else { return }
+                if isLoading {
+                    noStoriesLabel.isHidden = true
+                    activityIndicator.startAnimating()
+                } else {
+                    activityIndicator.stopAnimating()
+                }
+            }
+            .store(in: &subscriptions)
+
+        output.errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (title, message) in
+                guard let self else { return }
+                let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default) { _ in }
+                ac.addAction(okAction)
+                present(ac, animated: true)
             }
             .store(in: &subscriptions)
     }
@@ -95,6 +124,11 @@ extension FeedDetailsViewController {
         view.addSubview(noStoriesLabel)
         noStoriesLabel.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+
+        view.addSubview(activityIndicator)
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
 

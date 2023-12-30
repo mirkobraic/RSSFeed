@@ -8,9 +8,15 @@
 import Foundation
 
 extension RSSParser {
-    enum ParserError: Error {
-        case urlNotSupported
-        case unknownError
+    enum ParserError: Error, CustomStringConvertible {
+        case parsingFailed
+
+        var description: String {
+            switch self {
+            case .parsingFailed:
+                return "Invalid RSS feed format"
+            }
+        }
     }
 
     enum ElementType: String {

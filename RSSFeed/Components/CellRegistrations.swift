@@ -13,7 +13,7 @@ class CellRegistrations {
     static func feedListCell() -> UICollectionView.CellRegistration<UICollectionViewListCell, RssFeed> {
         return .init { cell, indexPath, rssFeed in
             var content = cell.defaultContentConfiguration()
-            content.text = rssFeed.title.isEmpty ? rssFeed.url : rssFeed.title
+            content.text = rssFeed.title ?? rssFeed.url
             content.secondaryText = rssFeed.description
             cell.contentConfiguration = content
         }

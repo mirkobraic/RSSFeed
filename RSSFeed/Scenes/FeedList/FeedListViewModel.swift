@@ -43,28 +43,9 @@ class FeedListViewModel {
         self.rssParser = rssParser
         self.feedStorage = feedStorage
 
-        do {
-            subjects.loadingData.send(true)
-            let storedFeeds = try feedStorage.getRssFeeds()
-
-            Task {
-                feeds = await storedFeeds.asyncMap { storedFeed in
-                    let result = await rssParser.parse(from: storedFeed.url)
-                    if case .success(let feed) = result {
-                        feed.isFavorite = storedFeed.isFavorite
-                        return feed
-                    }
-                    return RssFeed(url: storedFeed.url, isFavorite: storedFeed.isFavorite)
-                }
-
-                subjects.loadingData.send(false)
-                subjects.feedsUpdated.send(feeds)
-            }
-        } catch {
-            subjects.loadingData.send(false)
-            subjects.feedsUpdated.send(feeds)
-            Logger.storage.error("Error fetching RSS feeds from storage: \(error)")
-        }
+        let storedFeeds = (try? feedStorage.getRssFeeds()) ?? []
+        feeds = storedFeeds.map { RssFeed(from: $0) }
+        subjects.feedsUpdated.send(feeds)
     }
 
     func transform(input: AnyPublisher<Input, Never>) -> Output {
@@ -81,6 +62,7 @@ class FeedListViewModel {
             case .deleteFeed(let feedId):
                 if let feed = getFeed(withId: feedId) {
                     // TODO: //
+                    print(feed)
                 }
             }
         }
@@ -98,32 +80,28 @@ class FeedListViewModel {
 
     private func addNewFeed(with feedUrl: String?) {
         guard let feedUrl else { return }
+
         let adjustedUrl = feedUrl.trimmingCharacters(in: .whitespacesAndNewlines).appendingHttpsIfMissing()
-
-        
-
-        if feeds.contains(where: { $0.url == adjustedUrl}) {
-            self.subjects.errorMessage.send(("Duplicate feed", "RSS feed you enterd is already stored in the app."))
+        guard feeds.contains(where: { $0.url == adjustedUrl }) == false else {
+            subjects.errorMessage.send(("Duplicate feed", "The RSS feed you entered is already saved in the application. Please enter a unique RSS feed."))
             return
         }
 
         subjects.loadingData.send(true)
         Task {
-            let result = await rssParser.parse(from: adjustedUrl)
-            subjects.loadingData.send(false)
-
-            switch result {
-            case .success(let newFeed):
+            do {
+                let newFeed = try await rssParser.parse(from: adjustedUrl)
                 feeds.append(newFeed)
-                subjects.feedsUpdated.send(feeds)
-                do {
-                    try feedStorage.saveRssFeeds(feeds.map { RssFeedStorageModel(url: $0.url, isFavorite: $0.isFavorite) })
-                } catch {
-                    Logger.storage.error("Error saving RSS feeds: \(error)")
-                }
-            case .failure(_):
-                self.subjects.errorMessage.send(("Invalid RSS source", "Please ensure that the provided URL points to a valid RSS source and uses the secure 'https://' protocol."))
+                try? feedStorage.saveRssFeeds(feeds.map { RssFeedStorageModel(from: $0) })
+            } catch let error as NetworkError {
+                subjects.errorMessage.send(("Network error", "\(error)"))
+            } catch is RSSParser.ParserError {
+                subjects.errorMessage.send(("Parsing error", "Unable to read RSS data from the provided source. Please verify that the URL corresponds to a valid RSS feed."))
+            } catch {
+                subjects.errorMessage.send(("Unexpected error", "\(error)"))
             }
+            subjects.loadingData.send(false)
+            subjects.feedsUpdated.send(feeds)
         }
     }
 }

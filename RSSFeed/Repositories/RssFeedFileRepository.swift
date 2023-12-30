@@ -6,34 +6,30 @@
 //
 
 import Foundation
+import OSLog
 
 class RssFeedFileRepository: RssFeedRepositoryType {
     let rssFeedFileUrl = FileManager.default.documentsDirectory.appendingPathComponent("rssFeeds")
 
     func getRssFeeds() throws -> [RssFeedStorageModel] {
-        let data = try Data(contentsOf: rssFeedFileUrl)
-        let feeds = try JSONDecoder().decode([RssFeedStorageModel].self, from: data)
-        return feeds
+        do {
+            let data = try Data(contentsOf: rssFeedFileUrl)
+            let feeds = try JSONDecoder().decode([RssFeedStorageModel].self, from: data)
+            return feeds
+        } catch {
+            // catching for the sake of logging
+            Logger.storage.error("RSS storage error - unable to fetch rss feeds: \(error)")
+            throw error
+        }
     }
 
     func saveRssFeeds(_ feeds: [RssFeedStorageModel]) throws {
-        let data = try JSONEncoder().encode(feeds)
-        try data.write(to: rssFeedFileUrl)
-    }
-
-    func insertRssFeed(_ feed: RssFeedStorageModel) throws {
-        let data = try Data(contentsOf: rssFeedFileUrl)
-        var feeds = try JSONDecoder().decode([RssFeedStorageModel].self, from: data)
-        feeds.append(feed)
-        let newData = try JSONEncoder().encode(feeds)
-        try newData.write(to: rssFeedFileUrl)
-    }
-
-    func deleteRssFeed(_ feed: RssFeedStorageModel) throws {
-        let data = try Data(contentsOf: rssFeedFileUrl)
-        var feeds = try JSONDecoder().decode([RssFeedStorageModel].self, from: data)
-        feeds.removeAll { $0.url == feed.url }
-        let newData = try JSONEncoder().encode(feeds)
-        try newData.write(to: rssFeedFileUrl)
+        do {
+            let data = try JSONEncoder().encode(feeds)
+            try data.write(to: rssFeedFileUrl)
+        } catch {
+            // catching for the sake of logging
+            Logger.storage.error("RSS storage error - unable to save rss feeds: \(error)")
+        }
     }
 }

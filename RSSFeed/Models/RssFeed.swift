@@ -10,15 +10,26 @@ import Foundation
 class RssFeed: Identifiable {
     let id = UUID()
     var url: String
+    var imageUrl: String?
+    var title: String?
+    var description: String?
+    var items: [RssItem]?
     var isFavorite: Bool
-
-    var imageUrl: String = ""
-    var title: String = ""
-    var description: String = ""
-    var items: [RssItem] = []
-
-    init(url: String, isFavorite: Bool = false) {
+    
+    init(url: String) {
         self.url = url
-        self.isFavorite = isFavorite
+        imageUrl = nil
+        title = nil
+        description = nil
+        items = nil
+        isFavorite = false
+    }
+
+    init(from feed: RssFeedStorageModel) {
+        url = feed.url
+        imageUrl = feed.imageUrl
+        title = feed.title
+        description = feed.description
+        isFavorite = feed.isFavorite
     }
 }
