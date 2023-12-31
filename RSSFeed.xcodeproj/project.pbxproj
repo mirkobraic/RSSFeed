@@ -39,6 +39,9 @@
 		9654664D2B3914BA00125226 /* ReuseIdentifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654664C2B3914BA00125226 /* ReuseIdentifiable.swift */; };
 		966793EB2B40C381000E3EBB /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793EA2B40C381000E3EBB /* NetworkService.swift */; };
 		966793F02B40CBAF000E3EBB /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793EF2B40CBAE000E3EBB /* NetworkError.swift */; };
+		966793F72B410965000E3EBB /* FeedCellContentConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793F62B410965000E3EBB /* FeedCellContentConfiguration.swift */; };
+		966793F92B410999000E3EBB /* FeedCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793F82B410999000E3EBB /* FeedCellContentView.swift */; };
+		966793FB2B410A1F000E3EBB /* FeedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793FA2B410A1F000E3EBB /* FeedCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +95,9 @@
 		9654664C2B3914BA00125226 /* ReuseIdentifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReuseIdentifiable.swift; sourceTree = "<group>"; };
 		966793EA2B40C381000E3EBB /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		966793EF2B40CBAE000E3EBB /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
+		966793F62B410965000E3EBB /* FeedCellContentConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellContentConfiguration.swift; sourceTree = "<group>"; };
+		966793F82B410999000E3EBB /* FeedCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellContentView.swift; sourceTree = "<group>"; };
+		966793FA2B410A1F000E3EBB /* FeedCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -289,6 +295,8 @@
 		965466482B3912DA00125226 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				966793F42B410900000E3EBB /* FeedCell */,
+				966793F52B41090D000E3EBB /* FeedItemCell */,
 				9654664A2B39130E00125226 /* CompositionalLayouts.swift */,
 				964561E12B3F4C6D006B390C /* CellRegistrations.swift */,
 			);
@@ -311,6 +319,23 @@
 				9619011B2B3CCAD40067ADE0 /* RSSParser+enums.swift */,
 			);
 			path = RSSParser;
+			sourceTree = "<group>";
+		};
+		966793F42B410900000E3EBB /* FeedCell */ = {
+			isa = PBXGroup;
+			children = (
+				966793FA2B410A1F000E3EBB /* FeedCell.swift */,
+				966793F82B410999000E3EBB /* FeedCellContentView.swift */,
+				966793F62B410965000E3EBB /* FeedCellContentConfiguration.swift */,
+			);
+			path = FeedCell;
+			sourceTree = "<group>";
+		};
+		966793F52B41090D000E3EBB /* FeedItemCell */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = FeedItemCell;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -458,8 +483,10 @@
 				966793EB2B40C381000E3EBB /* NetworkService.swift in Sources */,
 				961901142B3B1D5E0067ADE0 /* FeedDetailsViewController.swift in Sources */,
 				9619011A2B3C1EE20067ADE0 /* RSSParser.swift in Sources */,
+				966793F72B410965000E3EBB /* FeedCellContentConfiguration.swift in Sources */,
 				966793F02B40CBAF000E3EBB /* NetworkError.swift in Sources */,
 				961901062B39A1FA0067ADE0 /* FileManager+.swift in Sources */,
+				966793FB2B410A1F000E3EBB /* FeedCell.swift in Sources */,
 				965466012B38F56500125226 /* FeedListViewController.swift in Sources */,
 				9619010A2B3A02A90067ADE0 /* RssFeedFileRepository.swift in Sources */,
 				9619010C2B3A04E90067ADE0 /* RssFeed.swift in Sources */,
@@ -474,6 +501,7 @@
 				9619011C2B3CCAD40067ADE0 /* RSSParser+enums.swift in Sources */,
 				9654664B2B39130E00125226 /* CompositionalLayouts.swift in Sources */,
 				961901122B3B18670067ADE0 /* RssItem.swift in Sources */,
+				966793F92B410999000E3EBB /* FeedCellContentView.swift in Sources */,
 				9619011E2B3CE7FF0067ADE0 /* Sequence+.swift in Sources */,
 				964561E02B3E0EF4006B390C /* String+.swift in Sources */,
 				961901162B3B1D740067ADE0 /* FeedDetailsViewModel.swift in Sources */,

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SafariServices
 
 extension MainCoordinator {
     struct Dependencies {
@@ -64,7 +65,9 @@ class MainCoordinator: Coordinator {
 
     func openUrl(_ urlString: String) {
         guard let url = URL(string: urlString) else { return }
-        
-        // TODO: open safari
+
+        let vc = SFSafariViewController(url: url)
+        vc.preferredControlTintColor = .rsTint
+        navigationController.present(vc, animated: true)
     }
 }

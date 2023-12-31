@@ -10,19 +10,19 @@ import UIKit
 class CellRegistrations {
     private init() { }
 
-    static func feedListCell() -> UICollectionView.CellRegistration<UICollectionViewListCell, RssFeed> {
-        return .init { cell, indexPath, rssFeed in
-            var content = cell.defaultContentConfiguration()
-            content.text = rssFeed.title ?? rssFeed.url
-            content.secondaryText = rssFeed.description
-
-            var backgroundConfig = cell.backgroundConfiguration
-            backgroundConfig?.backgroundColor = .rsSecondaryBackground
-
-            cell.contentConfiguration = content
-            cell.backgroundConfiguration = backgroundConfig
-        }
-    }
+//    static func feedListCell() -> UICollectionView.CellRegistration<UICollectionViewListCell, RssFeed> {
+//        return .init { cell, indexPath, rssFeed in
+//            var content = cell.defaultContentConfiguration()
+//            content.text = rssFeed.title ?? rssFeed.url
+//            content.secondaryText = rssFeed.description
+//            
+//            var backgroundConfig = cell.backgroundConfiguration
+//            backgroundConfig?.backgroundColor = .rsSecondaryBackground
+//
+//            cell.contentConfiguration = content
+//            cell.backgroundConfiguration = backgroundConfig
+//        }
+//    }
 
     static func feedItemListCell() -> UICollectionView.CellRegistration<UICollectionViewListCell, RssItem> {
         return .init { cell, indexPath, rssItem in

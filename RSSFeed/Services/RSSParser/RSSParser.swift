@@ -22,10 +22,22 @@ class RSSParser: NSObject {
 
     func parse(from url: String) async throws -> RssFeed {
         let data = try await networkService.getData(from: url)
-
         rssFeed = RssFeed(url: url)
         currentElementPath = ""
 
+        return try parse(from: data)
+    }
+
+    func parse(into feed: RssFeed) async throws {
+        let data = try await networkService.getData(from: feed.url)
+        resetFeed(feed)
+        rssFeed = feed
+        currentElementPath = ""
+
+        _ = try parse(from: data)
+    }
+
+    private func parse(from data: Data) throws -> RssFeed {
         let parser = XMLParser(data: data)
         parser.delegate = self
         let succeeded = parser.parse()
@@ -33,24 +45,6 @@ class RSSParser: NSObject {
         if isParsingSatisfactory(for: rssFeed), succeeded {
             cleanup(feed: rssFeed)
             return rssFeed
-        } else {
-            Logger.parsing.error("RSSParser error - parsing unsuccessful.")
-            throw ParserError.parsingFailed
-        }
-    }
-
-    func parse(into feed: RssFeed) async throws {
-        let data = try await networkService.getData(from: feed.url)
-
-        rssFeed = feed
-        currentElementPath = ""
-
-        let parser = XMLParser(data: data)
-        parser.delegate = self
-        let succeeded = parser.parse()
-
-        if isParsingSatisfactory(for: rssFeed), succeeded {
-            cleanup(feed: rssFeed)
         } else {
             Logger.parsing.error("RSSParser error - parsing unsuccessful.")
             throw ParserError.parsingFailed
@@ -128,6 +122,13 @@ class RSSParser: NSObject {
                 item.attributedDescription = htmlString
             }
         }
+    }
+
+    private func resetFeed(_ feed: RssFeed) {
+        feed.title = nil
+        feed.description = nil
+        feed.imageUrl = nil
+        feed.items = nil
     }
 }
 

@@ -175,7 +175,9 @@ extension FeedListViewController {
     }
 
     private func initializeDataSource() {
-        let cellRegistration = CellRegistrations.feedListCell()
+        let cellRegistration = UICollectionView.CellRegistration<FeedCell, RssFeed>() { cell, indexPath, rssFeed in
+            cell.feed = rssFeed
+        }
         dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, rssFeedId in
             let rssFeed = self?.viewModel.getFeed(withId: rssFeedId)
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: rssFeed)
