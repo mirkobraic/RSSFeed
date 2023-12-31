@@ -49,7 +49,8 @@ class FeedDetailsViewController: UIViewController {
 
         collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: UICollectionViewListCell.defaultReuseIdentifier)
         collectionView.delegate = self
-        
+        collectionView.backgroundColor = .rsBackground
+
         initializeDataSource()
         bindToViewModel()
     }

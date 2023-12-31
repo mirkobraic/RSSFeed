@@ -15,7 +15,12 @@ class CellRegistrations {
             var content = cell.defaultContentConfiguration()
             content.text = rssFeed.title ?? rssFeed.url
             content.secondaryText = rssFeed.description
+
+            var backgroundConfig = cell.backgroundConfiguration
+            backgroundConfig?.backgroundColor = .rsSecondaryBackground
+
             cell.contentConfiguration = content
+            cell.backgroundConfiguration = backgroundConfig
         }
     }
 
@@ -28,7 +33,12 @@ class CellRegistrations {
             } else {
                 content.secondaryText = rssItem.description
             }
+
+            var backgroundConfig = cell.backgroundConfiguration
+            backgroundConfig?.backgroundColor = .rsSecondaryBackground
+
             cell.contentConfiguration = content
+            cell.backgroundConfiguration = backgroundConfig
         }
     }
 }

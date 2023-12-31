@@ -11,7 +11,8 @@ class CompositionalLayouts {
     private init() { }
 
     static func list() -> UICollectionViewCompositionalLayout {
-        let configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+        var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+        configuration.backgroundColor = UIColor.rsBackground
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         return layout
     }

@@ -23,6 +23,7 @@ class FeedListViewController: UIViewController {
     }
     private let addFeedButton = UIButton(type: .system).then {
         var config = UIButton.Configuration.plain()
+        config.baseForegroundColor = .rsTint
         config.title = "New RSS feed"
         config.image = UIImage(systemName: "plus.circle.fill")
         config.imagePadding = 5
@@ -55,10 +56,12 @@ class FeedListViewController: UIViewController {
 
         title = "RSS Feeds"
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.toolbar.barTintColor = .rsBackground
         navigationItem.rightBarButtonItem = editButtonItem
 
         addFeedButton.addTarget(self, action: #selector(addFeedTapped), for: .touchUpInside)
         collectionView.delegate = self
+        collectionView.backgroundColor = .rsBackground
 
         initializeDataSource()
         bindToViewModel()
