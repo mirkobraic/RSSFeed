@@ -25,6 +25,7 @@ class FeedCellContentView: UIView, UIContentView {
         $0.clipsToBounds = true
     }
     private let titleLabel = UILabel().then {
+        $0.font = .systemFont(ofSize: 16, weight: .medium)
         $0.numberOfLines = 0
     }
     private let descriptionLabel = UILabel().then {
@@ -47,8 +48,6 @@ class FeedCellContentView: UIView, UIContentView {
     }
 
     private func setupUI() {
-        backgroundColor = .rsSecondaryBackground
-        
         addSubview(imageView)
         addSubview(titleLabel)
         addSubview(descriptionLabel)
@@ -101,5 +100,4 @@ class FeedCellContentView: UIView, UIContentView {
         descriptionLabel.text = configuration.description
         favoriteImageView.image = configuration.isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
     }
-
 }

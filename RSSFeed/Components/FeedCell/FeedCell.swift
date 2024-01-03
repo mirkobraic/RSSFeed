@@ -22,6 +22,14 @@ class FeedCell: UICollectionViewCell {
         }
         contentConfig.isFavorite = feed.isFavorite
 
+        var backgroundConfig = UIBackgroundConfiguration.listPlainCell().updated(for: state)
+        if state.isSelected {
+            backgroundConfig.backgroundColor = .rsSecondaryBackgroundHighlighted
+        } else {
+            backgroundConfig.backgroundColor = .rsSecondaryBackground
+        }
+
         contentConfiguration = contentConfig
+        backgroundConfiguration = backgroundConfig
     }
 }

@@ -117,7 +117,9 @@ class RSSParser: NSObject {
                 let htmlString = try? NSMutableAttributedString(data: data,
                                                                 options: [.documentType: NSAttributedString.DocumentType.html],
                                                                 documentAttributes: nil)
-                let attributes: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 12)]
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 12),
+                    .foregroundColor: UIColor.label]
                 htmlString?.addAttributes(attributes, range: NSRange(location: 0, length: htmlString?.length ?? 0))
                 item.attributedDescription = htmlString
             }

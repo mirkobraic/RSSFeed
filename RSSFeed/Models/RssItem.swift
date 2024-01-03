@@ -16,4 +16,6 @@ class RssItem: Identifiable {
     var attributedDescription: NSMutableAttributedString?
     var publicationDate: String?
     var imageUrl: String?
+
+    var isSeen = false
 }

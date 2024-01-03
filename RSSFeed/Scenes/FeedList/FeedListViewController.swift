@@ -30,7 +30,7 @@ class FeedListViewController: UIViewController {
         $0.configuration = config
     }
     private let activityIndicator = UIActivityIndicatorView()
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.list())
+    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList())
 
     private var subscriptions = Set<AnyCancellable>()
     private let input = PassthroughSubject<FeedListViewModel.Input, Never>()
@@ -70,6 +70,9 @@ class FeedListViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.isToolbarHidden = false
+        for indexPath in collectionView.indexPathsForSelectedItems ?? [] {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -138,7 +141,6 @@ class FeedListViewController: UIViewController {
 // MARK: - UICollectionViewDelegate
 extension FeedListViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
         if let id = dataSource.itemIdentifier(for: indexPath) {
             input.send(.feedTapped(id))
         }

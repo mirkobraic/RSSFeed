@@ -11,6 +11,7 @@ import Combine
 extension FeedDetailsViewModel {
     enum Input {
         case feedItemTapped(RssItem.ID)
+        case addToFavorites
     }
 
     struct Output {
@@ -52,7 +53,12 @@ class FeedDetailsViewModel {
             case .feedItemTapped(let itemId):
                 if let item = getItem(withId: itemId), let link = item.link {
                     coordinator?.openUrl(link)
+                    item.isSeen = true
                 }
+            case .addToFavorites:
+                feed.isFavorite.toggle()
+                subjects.feedUpdated.send(feed)
+                // TODO: save updated values
             }
         }
         .store(in: &subscriptions)
