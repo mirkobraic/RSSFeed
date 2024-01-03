@@ -12,7 +12,7 @@ extension MainCoordinator {
     struct Dependencies {
         let networkService: NetworkService
         let rssParser: RSSParser
-        let feedStorage: RssFeedRepositoryType
+        let feedService: RssFeedService
     }
 }
 
@@ -22,20 +22,13 @@ class MainCoordinator: Coordinator {
 
     private let dependencies: Dependencies
 
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, dependencies: Dependencies) {
         self.navigationController = navigationController
-
-        let networkService = NetworkService()
-        let rssParser = RSSParser(networkService: networkService)
-        let feedStorage = RssFeedFileRepository()
-        self.dependencies = Dependencies(networkService: networkService,
-                                         rssParser: rssParser,
-                                         feedStorage: feedStorage)
+        self.dependencies = dependencies
     }
 
     func start() {
-        let vm = FeedListViewModel(rssParser: dependencies.rssParser,
-                                   feedStorage: dependencies.feedStorage)
+        let vm = FeedListViewModel(feedService: dependencies.feedService)
         vm.coordinator = self
         let vc = FeedListViewController(viewModel: vm)
         navigationController.setViewControllers([vc], animated: false)
@@ -57,17 +50,17 @@ class MainCoordinator: Coordinator {
     }
 
     func openFeedDetails(for feed: RssFeed) {
-        let vm = FeedDetailsViewModel(feed: feed, rssParser: dependencies.rssParser)
+        let vm = FeedDetailsViewModel(feed: feed, feedService: dependencies.feedService)
         vm.coordinator = self
         let vc = FeedDetailsViewController(viewModel: vm)
         navigationController.pushViewController(vc, animated: true)
     }
 
-    func openUrl(_ urlString: String) {
+    func openUrl(_ urlString: String, completion: (() -> Void)?) {
         guard let url = URL(string: urlString) else { return }
 
         let vc = SFSafariViewController(url: url)
         vc.preferredControlTintColor = .rsTint
-        navigationController.present(vc, animated: true)
+        navigationController.present(vc, animated: true, completion: completion)
     }
 }

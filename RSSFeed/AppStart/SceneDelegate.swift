@@ -10,6 +10,7 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     var coordinator: MainCoordinator?
+    var dependencies: MainCoordinator.Dependencies?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -17,8 +18,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        let networkService = NetworkService()
+        let rssParser = RSSParser(networkService: networkService)
+        let feedService = RssFeedService(feedStorage: RssFeedFileRepository(), rssParser: rssParser)
+        dependencies = MainCoordinator.Dependencies(networkService: networkService,
+                                                    rssParser: rssParser,
+                                                    feedService: feedService)
+
         let nc = UINavigationController()
-        coordinator = MainCoordinator(navigationController: nc)
+        coordinator = MainCoordinator(navigationController: nc, dependencies: dependencies!)
         coordinator?.start()
 
         window = UIWindow(windowScene: windowScene)
@@ -52,6 +60,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        dependencies?.feedService.save()
     }
 }
 

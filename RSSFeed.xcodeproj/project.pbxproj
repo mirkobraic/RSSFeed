@@ -45,6 +45,7 @@
 		966793F72B410965000E3EBB /* FeedCellContentConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793F62B410965000E3EBB /* FeedCellContentConfiguration.swift */; };
 		966793F92B410999000E3EBB /* FeedCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793F82B410999000E3EBB /* FeedCellContentView.swift */; };
 		966793FB2B410A1F000E3EBB /* FeedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966793FA2B410A1F000E3EBB /* FeedCell.swift */; };
+		96EAECA62B45625E001B413F /* RssFeedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96EAECA52B45625E001B413F /* RssFeedService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +105,7 @@
 		966793F62B410965000E3EBB /* FeedCellContentConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellContentConfiguration.swift; sourceTree = "<group>"; };
 		966793F82B410999000E3EBB /* FeedCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCellContentView.swift; sourceTree = "<group>"; };
 		966793FA2B410A1F000E3EBB /* FeedCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCell.swift; sourceTree = "<group>"; };
+		96EAECA52B45625E001B413F /* RssFeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RssFeedService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -252,6 +254,7 @@
 			children = (
 				966793EC2B40C566000E3EBB /* Network */,
 				966793ED2B40C56F000E3EBB /* RSSParser */,
+				96EAECA52B45625E001B413F /* RssFeedService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -504,6 +507,7 @@
 				9619010C2B3A04E90067ADE0 /* RssFeed.swift in Sources */,
 				965466472B390B1000125226 /* RssFeedStorageModel.swift in Sources */,
 				961901182B3C17FA0067ADE0 /* Logger+.swift in Sources */,
+				96EAECA62B45625E001B413F /* RssFeedService.swift in Sources */,
 				965465FD2B38F56500125226 /* AppDelegate.swift in Sources */,
 				9654664D2B3914BA00125226 /* ReuseIdentifiable.swift in Sources */,
 				963FEF102B44CB780027CBBD /* FeedItemCellContentConfiguration.swift in Sources */,

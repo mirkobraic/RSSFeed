@@ -32,12 +32,12 @@ class FeedDetailsViewModel {
 
     weak var coordinator: MainCoordinator?
     private var feed: RssFeed
-    private let rssParser: RSSParser
+    private let feedService: RssFeedService
 
-    init(feed: RssFeed, rssParser: RSSParser) {
+    init(feed: RssFeed, feedService: RssFeedService) {
         self.feed = feed
-        self.rssParser = rssParser
-        
+        self.feedService = feedService
+
         if feed.items != nil {
             subjects.feedUpdated.send(feed)
         } else {
@@ -51,9 +51,9 @@ class FeedDetailsViewModel {
             switch input {
             case .feedItemTapped(let itemId):
                 if let item = getItem(withId: itemId), let link = item.link {
-                    coordinator?.openUrl(link)
-                    item.isSeen = true
-                    // TODO: notify storage to save this change (or do it in scene delegate)
+                    coordinator?.openUrl(link) {
+                        item.isSeen = true
+                    }
                 }
             }
         }
@@ -72,24 +72,24 @@ class FeedDetailsViewModel {
     private func fetchFeedItems() {
         subjects.loadingData.send(true)
         Task {
-            do {
-                // Parsing directly into the feed so the change is propagated back to the feeds list. Not an ideal solution. Alternative would be to parse feed items from FeedListViewModel, but then details screen would not be pushed until items are loaded.
-                try await rssParser.parse(into: feed)
-                for item in feed.items ?? [] {
-                    if let link = item.link, feed.readArticles.contains(link) {
-                        item.isSeen = true
-                    }
-                }
-            } catch let error as NetworkError {
-                subjects.errorMessage.send(("Network error", "\(error)"))
-            } catch is RSSParser.ParserError {
-                subjects.errorMessage.send(("Parsing error", "Unable to read RSS data from the provided source. Please verify that the URL corresponds to a valid RSS feed."))
-            } catch {
-                subjects.errorMessage.send(("Unexpected error", "\(error)"))
-            }
+            // Parsing directly into the feed so the change is propagated back to the feeds list. Not an ideal solution. Alternative would be to parse feed items from FeedListViewModel, but then details screen would not be pushed until items are loaded.
+            let error = await feedService.fetchItems(for: feed)
             DispatchQueue.main.async {
                 self.subjects.loadingData.send(false)
                 self.subjects.feedUpdated.send(self.feed)
+            }
+
+            if let error {
+                switch error {
+                case .networkError(let error):
+                    subjects.errorMessage.send(("Network error", "\(error)"))
+                case .parserError:
+                    subjects.errorMessage.send(("Parsing error", "Unable to read RSS data from the provided source. Please verify that the URL corresponds to a valid RSS feed."))
+                case .unknownError:
+                    subjects.errorMessage.send(("Unexpected error", "\(error)"))
+                case .duplicateFeed:
+                    break
+                }
             }
         }
     }

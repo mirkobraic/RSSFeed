@@ -124,6 +124,17 @@ class FeedListViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 
+    private func deleteFeed(withId id: RssFeed.ID) {
+        var snapshot = dataSource.snapshot()
+        snapshot.deleteItems([id])
+        dataSource.apply(snapshot)
+        if snapshot.itemIdentifiers.isEmpty {
+            noFeedsLabel.isHidden = false
+        }
+        
+        input.send(.deleteFeed(id))
+    }
+
     @objc private func addFeedTapped() {
         input.send(.addFeedTapped)
     }
@@ -147,13 +158,7 @@ extension FeedListViewController: CollectionViewSwipeActionDelegate {
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] action, view, completion in
             guard let self else { return }
             if let id = dataSource.itemIdentifier(for: indexPath) {
-                input.send(.deleteFeed(id))
-                var snapshot = dataSource.snapshot()
-                snapshot.deleteItems([id])
-                dataSource.apply(snapshot)
-                if snapshot.itemIdentifiers.isEmpty {
-                    noFeedsLabel.isHidden = false
-                }
+                deleteFeed(withId: id)
             }
             completion(true)
         }
@@ -164,7 +169,7 @@ extension FeedListViewController: CollectionViewSwipeActionDelegate {
         let addToFavorites = UIContextualAction(style: .normal, title: "Favorite") { [weak self] action, view, completion in
             guard let self else { return }
             if let id = dataSource.itemIdentifier(for: indexPath) {
-                input.send(.addToFavorites(id))
+                input.send(.toggleFavorites(id))
             }
             completion(true)
         }

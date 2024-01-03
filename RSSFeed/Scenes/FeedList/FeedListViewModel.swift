@@ -14,7 +14,7 @@ extension FeedListViewModel {
         case feedTapped(RssFeed.ID)
         case addFeedTapped
         case deleteFeed(RssFeed.ID)
-        case addToFavorites(RssFeed.ID)
+        case toggleFavorites(RssFeed.ID)
     }
 
     struct Output {
@@ -35,18 +35,11 @@ class FeedListViewModel {
     private let subjects = Subjects()
 
     weak var coordinator: MainCoordinator?
-    private let rssParser: RSSParser
-    private let feedStorage: RssFeedRepositoryType
+    private var feedService: RssFeedService
 
-    private var feeds = [RssFeed]()
-
-    init(rssParser: RSSParser, feedStorage: RssFeedRepositoryType) {
-        self.rssParser = rssParser
-        self.feedStorage = feedStorage
-
-        let storedFeeds = (try? feedStorage.getRssFeeds()) ?? []
-        feeds = storedFeeds.map { RssFeed(from: $0) }
-        subjects.feedsUpdated.send(feeds)
+    init(feedService: RssFeedService) {
+        self.feedService = feedService
+        subjects.feedsUpdated.send(feedService.getFeeds())
     }
 
     func transform(input: AnyPublisher<Input, Never>) -> Output {
@@ -61,13 +54,9 @@ class FeedListViewModel {
             case .addFeedTapped:
                 coordinator?.presentAddFeedScreen(completion: addNewFeed)
             case .deleteFeed(let feedId):
-                feeds.removeAll { $0.id == feedId }
-                saveFeeds()
-            case .addToFavorites(let feedId):
-                if let feed = getFeed(withId: feedId) {
-                    feed.isFavorite.toggle()
-                    saveFeeds()
-                }
+                feedService.deleteFeed(id: feedId)
+            case .toggleFavorites(let feedId):
+                feedService.toggleFavorite(id: feedId)
             }
         }
         .store(in: &subscriptions)
@@ -79,37 +68,30 @@ class FeedListViewModel {
     }
 
     func getFeed(withId id: RssFeed.ID) -> RssFeed? {
-        return feeds.first { $0.id == id }
+        return feedService.getFeed(withId: id)
     }
 
     private func addNewFeed(with feedUrl: String?) {
         guard let feedUrl else { return }
 
-        let adjustedUrl = feedUrl.trimmingCharacters(in: .whitespacesAndNewlines).appendingHttpsIfMissing()
-        guard feeds.contains(where: { $0.url == adjustedUrl }) == false else {
-            subjects.errorMessage.send(("Duplicate feed", "The RSS feed you entered is already saved in the application. Please enter a unique RSS feed."))
-            return
-        }
-
         subjects.loadingData.send(true)
         Task {
-            do {
-                let newFeed = try await rssParser.parse(from: adjustedUrl)
-                feeds.append(newFeed)
-                saveFeeds()
-            } catch let error as NetworkError {
-                subjects.errorMessage.send(("Network error", "\(error)"))
-            } catch is RSSParser.ParserError {
-                subjects.errorMessage.send(("Parsing error", "Unable to read RSS data from the provided source. Please verify that the URL corresponds to a valid RSS feed."))
-            } catch {
-                subjects.errorMessage.send(("Unexpected error", "\(error)"))
-            }
+            let error = await feedService.addNewFeed(url: feedUrl)
             subjects.loadingData.send(false)
-            subjects.feedsUpdated.send(feeds)
-        }
-    }
+            subjects.feedsUpdated.send(feedService.getFeeds())
 
-    private func saveFeeds() {
-        try? feedStorage.saveRssFeeds(feeds.map { RssFeedStorageModel(from: $0) })
+            if let error {
+                switch error {
+                case .duplicateFeed:
+                    subjects.errorMessage.send(("Duplicate feed", "The RSS feed you entered is already saved in the application. Please enter a unique RSS feed."))
+                case .networkError(let error):
+                    subjects.errorMessage.send(("Network error", "\(error)"))
+                case .parserError:
+                    subjects.errorMessage.send(("Parsing error", "Unable to read RSS data from the provided source. Please verify that the URL corresponds to a valid RSS feed."))
+                case .unknownError:
+                    subjects.errorMessage.send(("Unexpected error", "\(error)"))
+                }
+            }
+        }
     }
 }
