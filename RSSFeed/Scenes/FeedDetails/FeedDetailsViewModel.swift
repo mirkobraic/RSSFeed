@@ -11,7 +11,6 @@ import Combine
 extension FeedDetailsViewModel {
     enum Input {
         case feedItemTapped(RssItem.ID)
-        case addToFavorites
     }
 
     struct Output {
@@ -54,11 +53,8 @@ class FeedDetailsViewModel {
                 if let item = getItem(withId: itemId), let link = item.link {
                     coordinator?.openUrl(link)
                     item.isSeen = true
+                    // TODO: notify storage to save this change (or do it in scene delegate)
                 }
-            case .addToFavorites:
-                feed.isFavorite.toggle()
-                subjects.feedUpdated.send(feed)
-                // TODO: save updated values
             }
         }
         .store(in: &subscriptions)
@@ -79,6 +75,11 @@ class FeedDetailsViewModel {
             do {
                 // Parsing directly into the feed so the change is propagated back to the feeds list. Not an ideal solution. Alternative would be to parse feed items from FeedListViewModel, but then details screen would not be pushed until items are loaded.
                 try await rssParser.parse(into: feed)
+                for item in feed.items ?? [] {
+                    if let link = item.link, feed.readArticles.contains(link) {
+                        item.isSeen = true
+                    }
+                }
             } catch let error as NetworkError {
                 subjects.errorMessage.send(("Network error", "\(error)"))
             } catch is RSSParser.ParserError {

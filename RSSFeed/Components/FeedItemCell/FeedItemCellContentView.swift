@@ -69,6 +69,7 @@ class FeedItemCellContentView: UIView, UIContentView {
         guard appliedConfiguration != configuration else { return }
         appliedConfiguration = configuration
 
+        imageView.kf.indicatorType = .activity
         imageView.kf.setImage(with: configuration.imageUrl) { [weak self] result in
             guard let self else { return }
             switch result {

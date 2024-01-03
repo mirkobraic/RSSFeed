@@ -14,11 +14,15 @@ struct RssFeedStorageModel: Codable {
     var description: String?
     var imageUrl: String?
 
+    var readArticles: [String] = []
+
     init(from feed: RssFeed) {
         url = feed.url
         isFavorite = feed.isFavorite
         title = feed.title
         description = feed.description
         imageUrl = feed.imageUrl
+
+        readArticles = feed.items?.filter { $0.isSeen == true }.compactMap { $0.link } ?? []
     }
 }

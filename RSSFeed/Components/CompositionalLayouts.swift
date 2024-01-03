@@ -10,8 +10,10 @@ import UIKit
 class CompositionalLayouts {
     private init() { }
 
-    static func plainList() -> UICollectionViewCompositionalLayout {
+    static func plainList(swipeActionDelegate: CollectionViewSwipeActionDelegate?) -> UICollectionViewCompositionalLayout {
         var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+        configuration.trailingSwipeActionsConfigurationProvider = swipeActionDelegate?.trailingAction
+        configuration.leadingSwipeActionsConfigurationProvider = swipeActionDelegate?.leadingAction
         configuration.backgroundColor = .rsBackground
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         return layout

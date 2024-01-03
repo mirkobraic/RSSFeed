@@ -30,7 +30,7 @@ class FeedListViewController: UIViewController {
         $0.configuration = config
     }
     private let activityIndicator = UIActivityIndicatorView()
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList())
+    private var collectionView: UICollectionView! //(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList(de))
 
     private var subscriptions = Set<AnyCancellable>()
     private let input = PassthroughSubject<FeedListViewModel.Input, Never>()
@@ -40,6 +40,7 @@ class FeedListViewController: UIViewController {
     init(viewModel: FeedListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList(swipeActionDelegate: self))
     }
     
     required init?(coder: NSCoder) {
@@ -57,7 +58,6 @@ class FeedListViewController: UIViewController {
         title = "RSS Feeds"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.toolbar.barTintColor = .rsBackground
-        navigationItem.rightBarButtonItem = editButtonItem
 
         addFeedButton.addTarget(self, action: #selector(addFeedTapped), for: .touchUpInside)
         collectionView.delegate = self
@@ -78,15 +78,6 @@ class FeedListViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.isToolbarHidden = true
-    }
-
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        if editing {
-//            applySnapshotForEditing()
-        } else {
-//            updateSnapshotForViewing()
-        }
     }
 
     private func bindToViewModel() {
@@ -148,6 +139,37 @@ extension FeedListViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, canEditItemAt indexPath: IndexPath) -> Bool {
         return true
+    }
+}
+
+extension FeedListViewController: CollectionViewSwipeActionDelegate {
+    func trailingAction(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] action, view, completion in
+            guard let self else { return }
+            if let id = dataSource.itemIdentifier(for: indexPath) {
+                input.send(.deleteFeed(id))
+                var snapshot = dataSource.snapshot()
+                snapshot.deleteItems([id])
+                dataSource.apply(snapshot)
+                if snapshot.itemIdentifiers.isEmpty {
+                    noFeedsLabel.isHidden = false
+                }
+            }
+            completion(true)
+        }
+        return UISwipeActionsConfiguration(actions: [delete])
+    }
+
+    func leadingAction(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let addToFavorites = UIContextualAction(style: .normal, title: "Favorite") { [weak self] action, view, completion in
+            guard let self else { return }
+            if let id = dataSource.itemIdentifier(for: indexPath) {
+                input.send(.addToFavorites(id))
+            }
+            completion(true)
+        }
+        addToFavorites.backgroundColor = .rsTint
+        return UISwipeActionsConfiguration(actions: [addToFavorites])
     }
 }
 

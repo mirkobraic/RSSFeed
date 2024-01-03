@@ -14,6 +14,7 @@ extension FeedListViewModel {
         case feedTapped(RssFeed.ID)
         case addFeedTapped
         case deleteFeed(RssFeed.ID)
+        case addToFavorites(RssFeed.ID)
     }
 
     struct Output {
@@ -60,9 +61,12 @@ class FeedListViewModel {
             case .addFeedTapped:
                 coordinator?.presentAddFeedScreen(completion: addNewFeed)
             case .deleteFeed(let feedId):
+                feeds.removeAll { $0.id == feedId }
+                saveFeeds()
+            case .addToFavorites(let feedId):
                 if let feed = getFeed(withId: feedId) {
-                    // TODO: //
-                    print(feed)
+                    feed.isFavorite.toggle()
+                    saveFeeds()
                 }
             }
         }
@@ -92,7 +96,7 @@ class FeedListViewModel {
             do {
                 let newFeed = try await rssParser.parse(from: adjustedUrl)
                 feeds.append(newFeed)
-                try? feedStorage.saveRssFeeds(feeds.map { RssFeedStorageModel(from: $0) })
+                saveFeeds()
             } catch let error as NetworkError {
                 subjects.errorMessage.send(("Network error", "\(error)"))
             } catch is RSSParser.ParserError {
@@ -103,5 +107,9 @@ class FeedListViewModel {
             subjects.loadingData.send(false)
             subjects.feedsUpdated.send(feeds)
         }
+    }
+
+    private func saveFeeds() {
+        try? feedStorage.saveRssFeeds(feeds.map { RssFeedStorageModel(from: $0) })
     }
 }

@@ -15,7 +15,9 @@ class RssFeed: Identifiable {
     var description: String?
     var imageUrl: String?
     var items: [RssItem]?
-    
+
+    var readArticles: [String] = []
+
     init(url: String) {
         self.url = url
         isFavorite = false
@@ -31,5 +33,7 @@ class RssFeed: Identifiable {
         title = feed.title
         description = feed.description
         imageUrl = feed.imageUrl
+
+        readArticles = feed.readArticles
     }
 }
