@@ -13,6 +13,7 @@ extension MainCoordinator {
         let networkService: NetworkService
         let rssParser: RSSParser
         let feedService: RssFeedService
+        let storageService: UserDefaultsService
     }
 }
 
@@ -28,7 +29,7 @@ class MainCoordinator: Coordinator {
     }
 
     func start() {
-        let vm = FeedListViewModel(feedService: dependencies.feedService)
+        let vm = FeedListViewModel(feedService: dependencies.feedService, storageService: dependencies.storageService)
         vm.coordinator = self
         let vc = FeedListViewController(viewModel: vm)
         navigationController.setViewControllers([vc], animated: false)

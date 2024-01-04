@@ -9,6 +9,7 @@ import UIKit
 
 class FeedCell: UICollectionViewCell {
     var feed: RssFeed?
+    var favoriteTapCallback: (() -> Void)?
 
     override func updateConfiguration(using state: UICellConfigurationState) {
         super.updateConfiguration(using: state)
@@ -21,6 +22,7 @@ class FeedCell: UICollectionViewCell {
             contentConfig.imageUrl = URL(string: url)
         }
         contentConfig.isFavorite = feed.isFavorite
+        contentConfig.favoriteTapCallback = favoriteTapCallback
 
         var backgroundConfig = UIBackgroundConfiguration.listPlainCell().updated(for: state)
         if state.isSelected {

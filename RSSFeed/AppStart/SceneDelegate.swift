@@ -23,7 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let feedService = RssFeedService(feedStorage: RssFeedFileRepository(), rssParser: rssParser)
         dependencies = MainCoordinator.Dependencies(networkService: networkService,
                                                     rssParser: rssParser,
-                                                    feedService: feedService)
+                                                    feedService: feedService,
+                                                    storageService: UserDefaultsService())
 
         let nc = UINavigationController()
         coordinator = MainCoordinator(navigationController: nc, dependencies: dependencies!)

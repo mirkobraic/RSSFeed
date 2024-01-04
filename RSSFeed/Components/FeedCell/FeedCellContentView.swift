@@ -32,13 +32,13 @@ class FeedCellContentView: UIView, UIContentView {
         $0.font = .systemFont(ofSize: 12)
         $0.numberOfLines = 0
     }
-    private let favoriteImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+    private let favoriteButton = UIButton().then {
         $0.tintColor = .rsTint
     }
 
     init(configuration: FeedCellContentConfiguration) {
         super.init(frame: .zero)
+        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         setupUI()
         apply(configuration: configuration)
     }
@@ -47,11 +47,15 @@ class FeedCellContentView: UIView, UIContentView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    @objc private func favoriteButtonTapped() {
+        appliedConfiguration.favoriteTapCallback?()
+    }
+
     private func setupUI() {
         addSubview(imageView)
         addSubview(titleLabel)
         addSubview(descriptionLabel)
-        addSubview(favoriteImageView)
+        addSubview(favoriteButton)
 
         imageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(20)
@@ -62,7 +66,7 @@ class FeedCellContentView: UIView, UIContentView {
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(10)
             make.leading.equalTo(imageView.snp.trailing).offset(10)
-            make.trailing.equalTo(favoriteImageView.snp.leading).offset(-10)
+            make.trailing.equalTo(favoriteButton.snp.leading).offset(-10)
         }
 
         descriptionLabel.snp.makeConstraints { make in
@@ -72,10 +76,10 @@ class FeedCellContentView: UIView, UIContentView {
             make.bottom.equalToSuperview().inset(10)
         }
 
-        favoriteImageView.snp.makeConstraints { make in
+        favoriteButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(20)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(20)
+            make.width.height.equalTo(44)
         }
     }
 
@@ -98,6 +102,7 @@ class FeedCellContentView: UIView, UIContentView {
         }
         titleLabel.text = configuration.title
         descriptionLabel.text = configuration.description
-        favoriteImageView.image = configuration.isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
+        let image = configuration.isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
+        favoriteButton.setImage(image, for: .normal)
     }
 }

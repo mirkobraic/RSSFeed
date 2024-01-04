@@ -63,6 +63,7 @@ class FeedListViewController: UIViewController {
         collectionView.delegate = self
         collectionView.backgroundColor = .rsBackground
 
+        setupSortMenu()
         initializeDataSource()
         bindToViewModel()
     }
@@ -117,6 +118,25 @@ class FeedListViewController: UIViewController {
             .store(in: &subscriptions)
     }
 
+    private func setupSortMenu() {
+        let defaultSortAction = UIAction(title: "Default", image: nil, state: .on) { [weak self] _ in
+            self?.input.send(.toggleSort(.default))
+        }
+        let favoritesSortAction = UIAction(title: "Favorites", image: UIImage(systemName: "star.fill")) { [weak self] _ in
+            self?.input.send(.toggleSort(.favorites))
+        }
+        switch viewModel.getCurrentSortOrder() {
+        case .default:
+            defaultSortAction.state = .on
+            favoritesSortAction.state = .off
+        case .favorites:
+            favoritesSortAction.state = .on
+            defaultSortAction.state = .off
+        }
+        let sortMenu = UIMenu(options: .singleSelection, children: [defaultSortAction , favoritesSortAction])
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down"), menu: sortMenu)
+    }
+
     private func applySnapshot(for feeds: [RssFeed]) {
         var snapshot = Snapshot()
         snapshot.appendSections(["single"])
@@ -147,12 +167,9 @@ extension FeedListViewController: UICollectionViewDelegate {
             input.send(.feedTapped(id))
         }
     }
-
-    func collectionView(_ collectionView: UICollectionView, canEditItemAt indexPath: IndexPath) -> Bool {
-        return true
-    }
 }
 
+// MARK: - CollectionViewSwipeActionDelegate
 extension FeedListViewController: CollectionViewSwipeActionDelegate {
     func trailingAction(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let delete = UIContextualAction(style: .destructive, title: "Delete") { [weak self] action, view, completion in
@@ -206,6 +223,10 @@ extension FeedListViewController {
     private func initializeDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<FeedCell, RssFeed>() { cell, indexPath, rssFeed in
             cell.feed = rssFeed
+            cell.favoriteTapCallback = {
+                rssFeed.isFavorite.toggle()
+                cell.setNeedsUpdateConfiguration()
+            }
         }
         dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, rssFeedId in
             let rssFeed = self?.viewModel.getFeed(withId: rssFeedId)

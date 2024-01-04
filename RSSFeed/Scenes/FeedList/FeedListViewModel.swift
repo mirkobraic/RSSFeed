@@ -15,6 +15,7 @@ extension FeedListViewModel {
         case addFeedTapped
         case deleteFeed(RssFeed.ID)
         case toggleFavorites(RssFeed.ID)
+        case toggleSort(SortOrder)
     }
 
     struct Output {
@@ -36,10 +37,12 @@ class FeedListViewModel {
 
     weak var coordinator: MainCoordinator?
     private var feedService: RssFeedService
+    private var storageService: UserDefaultsService
 
-    init(feedService: RssFeedService) {
+    init(feedService: RssFeedService, storageService: UserDefaultsService) {
         self.feedService = feedService
-        subjects.feedsUpdated.send(feedService.getFeeds())
+        self.storageService = storageService
+        subjects.feedsUpdated.send(getSortedFeeds())
     }
 
     func transform(input: AnyPublisher<Input, Never>) -> Output {
@@ -57,6 +60,9 @@ class FeedListViewModel {
                 feedService.deleteFeed(id: feedId)
             case .toggleFavorites(let feedId):
                 feedService.toggleFavorite(id: feedId)
+            case .toggleSort(let sortOrder):
+                storageService.sortOrder = sortOrder
+                subjects.feedsUpdated.send(getSortedFeeds())
             }
         }
         .store(in: &subscriptions)
@@ -71,6 +77,22 @@ class FeedListViewModel {
         return feedService.getFeed(withId: id)
     }
 
+    func getCurrentSortOrder() -> SortOrder {
+        return storageService.sortOrder
+    }
+
+    func getSortedFeeds() -> [RssFeed] {
+        let sortOrder = storageService.sortOrder
+        let feeds = feedService.getFeeds()
+
+        switch sortOrder {
+        case .default:
+            return feeds
+        case .favorites:
+            return feeds.sorted { $0.isFavorite && !$1.isFavorite }
+        }
+    }
+
     private func addNewFeed(with feedUrl: String?) {
         guard let feedUrl else { return }
 
@@ -78,7 +100,7 @@ class FeedListViewModel {
         Task {
             let error = await feedService.addNewFeed(url: feedUrl)
             subjects.loadingData.send(false)
-            subjects.feedsUpdated.send(feedService.getFeeds())
+            subjects.feedsUpdated.send(getSortedFeeds())
 
             if let error {
                 switch error {

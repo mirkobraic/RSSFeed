@@ -12,6 +12,7 @@ struct FeedCellContentConfiguration: UIContentConfiguration, Hashable {
     var description: String?
     var imageUrl: URL?
     var isFavorite: Bool = false
+    var favoriteTapCallback: (() -> Void)?
 
     func makeContentView() -> UIView & UIContentView {
         return FeedCellContentView(configuration: self)
@@ -19,5 +20,16 @@ struct FeedCellContentConfiguration: UIContentConfiguration, Hashable {
 
     func updated(for state: UIConfigurationState) -> FeedCellContentConfiguration {
         return self
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(title)
+        hasher.combine(description)
+        hasher.combine(imageUrl)
+        hasher.combine(isFavorite)
+    }
+
+    static func == (lhs: FeedCellContentConfiguration, rhs: FeedCellContentConfiguration) -> Bool {
+        lhs.hashValue == rhs.hashValue
     }
 }
