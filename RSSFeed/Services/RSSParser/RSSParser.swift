@@ -66,9 +66,13 @@ class RSSParser: NSObject {
             currentItem?.title = (currentItem?.title ?? "") + value
         case .channelItemDescription:
             if value.containsImgTag() {
-                currentItem?.imageUrl = (currentItem?.imageUrl ?? "") + value
+                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
             } else {
                 currentItem?.description = (currentItem?.description ?? "") + value
+            }
+        case .channelItemContentEncoded:
+            if currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
             }
         case .channelItemLink:
             currentItem?.link = (currentItem?.link ?? "") + value
@@ -79,13 +83,14 @@ class RSSParser: NSObject {
         case .channelItemPublicationDate:
             currentItem?.publicationDate = (currentItem?.publicationDate ?? "") + value
 
-        case .channelItem:
+         default:
             break
         }
     }
 
-    private func parseElement(_ elementName: String) {
+    private func parseElement(_ elementName: String, attributes: [String: String]) {
         guard let elementType = ElementType(rawValue: currentElementPath as String), let rssFeed else { return }
+        let currentItem = rssFeed.items?.last
 
         switch elementType {
         case .channelItem:
@@ -95,9 +100,21 @@ class RSSParser: NSObject {
             rssFeed.items?.append(RssItem())
         case .channelItemCategory:
             if rssFeed.items?.last?.categories == nil {
-                rssFeed.items?.last?.categories = []
+                currentItem?.categories = []
             }
             rssFeed.items?.last?.categories?.append("")
+        case .channelItemMediaThumbnail:
+            if let imageUrl = attributes["url"] {
+                currentItem?.imageUrl = imageUrl
+            }
+        case .channelItemEnclosure:
+            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = imageUrl
+            }
+        case .channelItemMediaContent:
+            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = imageUrl
+            }
         default:
             break
         }
@@ -108,9 +125,10 @@ class RSSParser: NSObject {
     }
 
     private func cleanup(feed: RssFeed) {
+        feed.title = feed.title?.trimmingCharacters(in: .whitespacesAndNewlines)
         for item in feed.items ?? [] {
+            item.title = item.title?.trimmingCharacters(in: .whitespacesAndNewlines)
             item.description = item.description?.trimmingCharacters(in: .whitespacesAndNewlines)
-            item.imageUrl = item.imageUrl?.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag() ?? ""
 
             if let description = item.description {
                 let data = Data(description.utf8)
@@ -141,9 +159,9 @@ extension RSSParser: XMLParserDelegate {
                 namespaceURI: String?,
                 qualifiedName qName: String?,
                 attributes attributeDict: [String: String] = [:]) {
-        
+
         currentElementPath = currentElementPath.appendingPathComponent(elementName) as NSString
-        parseElement(elementName)
+        parseElement(elementName, attributes: attributeDict)
     }
 
     func parser(_ parser: XMLParser, 

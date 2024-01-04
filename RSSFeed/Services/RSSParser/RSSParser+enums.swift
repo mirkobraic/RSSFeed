@@ -30,5 +30,9 @@ extension RSSParser {
         case channelItemLink            = "rss/channel/item/link"
         case channelItemCategory        = "rss/channel/item/category"
         case channelItemPublicationDate = "rss/channel/item/pubDate"
+        case channelItemMediaThumbnail  = "rss/channel/item/media:thumbnail"
+        case channelItemEnclosure       = "rss/channel/item/enclosure"
+        case channelItemMediaContent    = "rss/channel/item/media:content"
+        case channelItemContentEncoded  = "rss/channel/item/content:encoded"
     }
 }

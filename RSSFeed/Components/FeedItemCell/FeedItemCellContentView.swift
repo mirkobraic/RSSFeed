@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Then
+import Kingfisher
 
 class FeedItemCellContentView: UIView, UIContentView {
     private var appliedConfiguration: FeedItemCellContentConfiguration!
@@ -20,14 +22,17 @@ class FeedItemCellContentView: UIView, UIContentView {
     private let imageView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
+        $0.backgroundColor = .lightGray.withAlphaComponent(0.1)
     }
     private let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 16, weight: .bold)
         $0.numberOfLines = 0
+        $0.setContentHuggingPriority(.required, for: .vertical)
     }
     private let descriptionLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 12)
         $0.numberOfLines = 0
+        $0.setContentHuggingPriority(.required, for: .vertical)
     }
 
     init(configuration: FeedItemCellContentConfiguration) {
@@ -50,7 +55,7 @@ class FeedItemCellContentView: UIView, UIContentView {
 
         imageView.snp.makeConstraints { make in
             make.leading.top.trailing.equalToSuperview()
-            make.height.equalTo(imageView.snp.width).dividedBy(2)
+            make.height.equalTo(imageView.snp.width).multipliedBy(0.5)
         }
 
         titleLabel.snp.makeConstraints { make in
@@ -61,31 +66,14 @@ class FeedItemCellContentView: UIView, UIContentView {
         descriptionLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(titleLabel)
             make.top.equalTo(titleLabel.snp.bottom).offset(5)
-            make.bottom.equalToSuperview().inset(10)
+            make.bottom.equalToSuperview().inset(10).priority(.high)
         }
     }
-
+    
     private func apply(configuration: FeedItemCellContentConfiguration) {
         guard appliedConfiguration != configuration else { return }
         appliedConfiguration = configuration
 
-        imageView.kf.indicatorType = .activity
-        imageView.kf.setImage(with: configuration.imageUrl) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                imageView.snp.remakeConstraints { make in
-                    make.leading.top.trailing.equalToSuperview()
-                    make.height.equalTo(self.imageView.snp.width).dividedBy(2)
-                }
-            case .failure:
-                imageView.snp.remakeConstraints { make in
-                    make.leading.top.trailing.equalToSuperview()
-                    make.height.equalTo(0)
-                }
-            }
-        }
-        
         titleLabel.text = configuration.title
         titleLabel.font = configuration.isSeen ? .systemFont(ofSize: 16, weight: .regular) : .systemFont(ofSize: 16, weight: .bold)
 
@@ -94,6 +82,31 @@ class FeedItemCellContentView: UIView, UIContentView {
         } else {
             descriptionLabel.text = configuration.description
         }
+        setImage(from: configuration.imageUrl)
+    }
 
+    private func setImage(from url: URL?) {
+        imageView.kf.indicatorType = .activity
+        imageView.kf.setImage(with: url) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let response):
+                var ratio: CGFloat = 0
+                if response.image.size.width > 50 {
+                    ratio = response.image.size.height / response.image.size.width
+                }
+                imageView.snp.remakeConstraints { make in
+                    make.leading.top.trailing.equalToSuperview()
+                    make.height.equalTo(self.imageView.snp.width).multipliedBy(ratio)
+                }
+                invalidateIntrinsicContentSize()
+            case .failure:
+                imageView.snp.remakeConstraints { make in
+                    make.leading.top.trailing.equalToSuperview()
+                    make.height.equalTo(0)
+                }
+                invalidateIntrinsicContentSize()
+            }
+        }
     }
 }
