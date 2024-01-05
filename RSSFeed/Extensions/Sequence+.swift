@@ -2,17 +2,14 @@
 //  Sequence+.swift
 //  RSSFeed
 //
-//  Created by Mirko Braic on 28.12.2023..
+//  Created by Mirko Braic on 05.01.2024..
 //
 
 import Foundation
 
-extension Sequence {
-    func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
-        var values = [T]()
-        for element in self {
-            try await values.append(transform(element))
-        }
-        return values
+extension Sequence where Element: Hashable {
+    func uniqued() -> [Element] {
+        var set = Set<Element>()
+        return filter { set.insert($0).inserted }
     }
 }

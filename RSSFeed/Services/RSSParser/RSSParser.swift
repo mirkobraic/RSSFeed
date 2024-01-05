@@ -130,6 +130,10 @@ class RSSParser: NSObject {
             item.title = item.title?.trimmingCharacters(in: .whitespacesAndNewlines)
             item.description = item.description?.trimmingCharacters(in: .whitespacesAndNewlines)
 
+            if let categories = item.categories {
+                item.categories = categories.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            }
+
             if let description = item.description {
                 let data = Data(description.utf8)
                 let htmlString = try? NSMutableAttributedString(data: data,

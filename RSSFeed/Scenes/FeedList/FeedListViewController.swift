@@ -30,7 +30,7 @@ class FeedListViewController: UIViewController {
         $0.configuration = config
     }
     private let activityIndicator = UIActivityIndicatorView()
-    private var collectionView: UICollectionView! //(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList(de))
+    private var collectionView: UICollectionView!
 
     private var subscriptions = Set<AnyCancellable>()
     private let input = PassthroughSubject<FeedListViewModel.Input, Never>()
@@ -40,7 +40,8 @@ class FeedListViewController: UIViewController {
     init(viewModel: FeedListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.plainList(swipeActionDelegate: self))
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: plainList(swipeActionDelegate: self))
+        initializeDataSource()
     }
     
     required init?(coder: NSCoder) {
@@ -60,11 +61,10 @@ class FeedListViewController: UIViewController {
         navigationController?.toolbar.barTintColor = .rsBackground
 
         addFeedButton.addTarget(self, action: #selector(addFeedTapped), for: .touchUpInside)
-        collectionView.delegate = self
         collectionView.backgroundColor = .rsBackground
+        collectionView.delegate = self
 
         setupSortMenu()
-        initializeDataSource()
         bindToViewModel()
     }
 

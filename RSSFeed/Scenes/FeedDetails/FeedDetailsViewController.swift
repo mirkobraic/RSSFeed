@@ -9,11 +9,22 @@ import UIKit
 import Combine
 import Then
 
-class FeedDetailsViewController: UIViewController {
-    typealias DataSource = UICollectionViewDiffableDataSource<String, RssItem.ID>
-    typealias Snapshot = NSDiffableDataSourceSnapshot<String, RssItem.ID>
+extension FeedDetailsViewController {
+    enum DataSourceItem: Hashable {
+        case category(String)
+        case feedItem(RssItem.ID)
+    }
 
-    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: CompositionalLayouts.feedItemsList())
+    enum Sections {
+        case categories
+        case items
+    }
+}
+
+class FeedDetailsViewController: UIViewController {
+    typealias DataSource = UICollectionViewDiffableDataSource<Sections, DataSourceItem>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<Sections, DataSourceItem>
+
     private let noStoriesLabel = UILabel().then {
         $0.text = "No stories in the current feed."
         $0.isHidden = true
@@ -22,15 +33,17 @@ class FeedDetailsViewController: UIViewController {
         $0.font = UIFont.preferredFont(forTextStyle: .title3)
     }
     private let activityIndicator = UIActivityIndicatorView()
+    private var collectionView: UICollectionView!
 
     private var subscriptions = Set<AnyCancellable>()
     private let input = PassthroughSubject<FeedDetailsViewModel.Input, Never>()
-    private var dataSource: DataSource!
+    var dataSource: DataSource!
     private let viewModel: FeedDetailsViewModel
 
     init(viewModel: FeedDetailsViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionLayout(expandCategories: false))
     }
     
     required init?(coder: NSCoder) {
@@ -50,6 +63,7 @@ class FeedDetailsViewController: UIViewController {
         collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: UICollectionViewListCell.defaultReuseIdentifier)
         collectionView.delegate = self
         collectionView.backgroundColor = .rsBackground
+        collectionView.allowsMultipleSelection = true
 
         initializeDataSource()
         bindToViewModel()
@@ -69,12 +83,21 @@ class FeedDetailsViewController: UIViewController {
             .sink { [weak self] feed in
                 guard let self, let feed else { return }
                 title = feed.title
-                if let items = feed.items {
-                    noStoriesLabel.isHidden = !items.isEmpty
-                    applySnapshot(for: items)
-                } else {
-                    noStoriesLabel.isHidden = true
-                }
+            }
+            .store(in: &subscriptions)
+
+        output.itemsUpdated
+            .sink { [weak self] items in
+                guard let self else { return }
+                noStoriesLabel.isHidden = !items.isEmpty
+                applySnapshot(forItems: items)
+            }
+            .store(in: &subscriptions)
+
+        output.categoriesUpdated
+            .sink { [weak self] categories in
+                guard let self else { return }
+                applySnapshot(forCategories: categories)
             }
             .store(in: &subscriptions)
 
@@ -103,20 +126,43 @@ class FeedDetailsViewController: UIViewController {
             .store(in: &subscriptions)
     }
 
-    private func applySnapshot(for items: [RssItem]) {
-        var snapshot = Snapshot()
-        snapshot.appendSections(["single"])
-        snapshot.appendItems(items.map { $0.id })
-        dataSource.apply(snapshot, animatingDifferences: true)
+    private func applySnapshot(forItems items: [RssItem]) {
+        var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<DataSourceItem>()
+        sectionSnapshot.append(items.map { DataSourceItem.feedItem($0.id) })
+        dataSource.apply(sectionSnapshot, to: .items, animatingDifferences: true)
+    }
+
+    private func applySnapshot(forCategories categories: [String]) {
+        guard categories.isEmpty == false else { return }
+        var currentSnapshot = dataSource.snapshot()
+        if currentSnapshot.sectionIdentifiers.contains(.categories) {
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<DataSourceItem>()
+            sectionSnapshot.append(categories.map { DataSourceItem.category($0) })
+            dataSource.apply(sectionSnapshot, to: .categories, animatingDifferences: true)
+        } else {
+            currentSnapshot.appendSections([.categories])
+            currentSnapshot.moveSection(.categories, beforeSection: .items)
+            currentSnapshot.appendItems(categories.map { DataSourceItem.category($0) }, toSection: .categories)
+            dataSource.apply(currentSnapshot, animatingDifferences: true)
+        }
     }
 }
 
 // MARK: - UICollectionViewDelegate
 extension FeedDetailsViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let id = dataSource.itemIdentifier(for: indexPath) {
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+        switch item {
+        case .category(let category):
+            input.send(.categoryTapped(category))
+        case .feedItem(let id):
             input.send(.feedItemTapped(id))
         }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        guard let item = dataSource.itemIdentifier(for: indexPath), case .category(let category) = item else { return }
+        input.send(.categoryTapped(category))
     }
 }
 
@@ -140,12 +186,28 @@ extension FeedDetailsViewController {
     }
 
     private func initializeDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<FeedItemCell, RssItem>() { cell, indexPath, rssItem in
+        let itemCellRegistration = UICollectionView.CellRegistration<FeedItemCell, RssItem>() { cell, indexPath, rssItem in
             cell.item = rssItem
         }
-        dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, rssItemId in
-            let rssItem = self?.viewModel.getItem(withId: rssItemId)
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: rssItem)
+        let categoryCellRegistration = UICollectionView.CellRegistration<CategoryCell, String>() { cell, indexPath, category in
+            cell.label.text = category
+        }
+
+        dataSource = DataSource(collectionView: collectionView) { [weak self] collectionView, indexPath, item in
+            switch item {
+            case .category(let category):
+                return collectionView.dequeueConfiguredReusableCell(using: categoryCellRegistration, for: indexPath, item: category)
+            case .feedItem(let id):
+                let rssItem = self?.viewModel.getItem(withId: id)
+                return collectionView.dequeueConfiguredReusableCell(using: itemCellRegistration, for: indexPath, item: rssItem)
+            }
+        }
+
+        let supplementaryRegistration = UICollectionView.SupplementaryRegistration<CategoryHeader>(elementKind: CategoryHeader.defaultElementKind) { header, elementKid, indexPath in
+            header.label.text = "Categories:"
+        }
+        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+            return collectionView.dequeueConfiguredReusableSupplementary(using: supplementaryRegistration, for: indexPath)
         }
     }
 }
