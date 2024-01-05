@@ -221,10 +221,10 @@ extension FeedListViewController {
     }
 
     private func initializeDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<FeedCell, RssFeed>() { cell, indexPath, rssFeed in
+        let cellRegistration = UICollectionView.CellRegistration<FeedCell, RssFeed>() { [weak self] cell, indexPath, rssFeed in
             cell.feed = rssFeed
             cell.favoriteTapCallback = {
-                rssFeed.isFavorite.toggle()
+                self?.input.send(.toggleFavorites(rssFeed.id))
                 cell.setNeedsUpdateConfiguration()
             }
         }

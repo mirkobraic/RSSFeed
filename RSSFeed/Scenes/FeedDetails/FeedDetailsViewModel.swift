@@ -9,9 +9,10 @@ import Foundation
 import Combine
 
 extension FeedDetailsViewModel {
-    enum Input {
-        case feedItemTapped(RssItem.ID)
-        case categoryTapped(String)
+    struct Input {
+        let feedItemTapped = PassthroughSubject<RssItem.ID, Never>()
+        let categoryTapped = PassthroughSubject<String, Never>()
+        let searchTextUpdated = PassthroughSubject<String, Never>()
     }
 
     struct Output {
@@ -41,15 +42,24 @@ class FeedDetailsViewModel {
 
     private var allCategories = [String]()
     private var filteringCategories = Set<String>()
+    private var searchText = ""
     private var feedItemsFiltered: [RssItem] {
-        guard let items = feed.items else { return [] }
-        guard filteringCategories.isEmpty == false else { return items }
+        guard var items = feed.items else { return [] }
 
-        return items.filter { item in
-            let categoriesSet = Set(item.categories ?? [])
-            let hasMatchingCategories = categoriesSet.intersection(filteringCategories).isEmpty == false
-            return hasMatchingCategories
+        if searchText.isEmpty == false {
+            items = items.filter {
+                let range = $0.title?.range(of: searchText, options: .caseInsensitive)
+                return range != nil
+            }
         }
+        if filteringCategories.isEmpty == false {
+            items = items.filter { item in
+                let categoriesSet = Set(item.categories ?? [])
+                let hasMatchingCategories = categoriesSet.intersection(filteringCategories).isEmpty == false
+                return hasMatchingCategories
+            }
+        }
+        return items
     }
 
     init(feed: RssFeed, feedService: RssFeedService) {
@@ -59,24 +69,28 @@ class FeedDetailsViewModel {
         if let items = feed.items {
             subjects.feedUpdated.send(feed)
             subjects.itemsUpdated.send(feedItemsFiltered)
-            allCategories = findAllCategories(in: items)
+            allCategories = findCategories(in: items)
             subjects.categoriesUpdated.send(Array(allCategories))
         } else {
             fetchFeedItems()
         }
     }
 
-    func transform(input: AnyPublisher<Input, Never>) -> Output {
-        input.sink { [weak self] input in
-            guard let self else { return }
-            switch input {
-            case .feedItemTapped(let itemId):
+    func transform(input: Input) -> Output {
+        input.feedItemTapped
+            .sink { [weak self] itemId in
+                guard let self else { return }
                 if let item = getItem(withId: itemId), let link = item.link {
                     coordinator?.openUrl(link) {
                         item.isSeen = true
                     }
                 }
-            case .categoryTapped(let category):
+            }
+            .store(in: &subscriptions)
+
+        input.categoryTapped
+            .sink { [weak self] category in
+                guard let self else { return }
                 if filteringCategories.contains(category) {
                     filteringCategories.remove(category)
                 } else {
@@ -84,8 +98,22 @@ class FeedDetailsViewModel {
                 }
                 subjects.itemsUpdated.send(feedItemsFiltered)
             }
-        }
-        .store(in: &subscriptions)
+            .store(in: &subscriptions)
+
+        input.searchTextUpdated
+            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .sink { [weak self] searchText in
+                guard let self else { return }
+                self.searchText = searchText
+                subjects.itemsUpdated.send(feedItemsFiltered)
+                if searchText.isEmpty {
+                    subjects.categoriesUpdated.send(allCategories)
+                } else {
+                    let currentCategories = findCategories(in: feedItemsFiltered)
+                    subjects.categoriesUpdated.send(currentCategories)
+                }
+            }
+            .store(in: &subscriptions)
 
         let output = Output(feedUpdated: subjects.feedUpdated.eraseToAnyPublisher(),
                             itemsUpdated: subjects.itemsUpdated.eraseToAnyPublisher(),
@@ -99,7 +127,8 @@ class FeedDetailsViewModel {
         return feed.items?.first { $0.id == id }
     }
 
-    private func findAllCategories(in items: [RssItem]) -> [String] {
+    private func findCategories(in items: [RssItem]) -> [String] {
+        if items.isEmpty { return allCategories }
         return items
             .compactMap { $0.categories }
             .flatMap { $0 }
@@ -115,7 +144,7 @@ class FeedDetailsViewModel {
                 self.subjects.loadingData.send(false)
                 self.subjects.feedUpdated.send(self.feed)
                 self.subjects.itemsUpdated.send(self.feedItemsFiltered)
-                self.allCategories = self.findAllCategories(in: self.feed.items ?? [])
+                self.allCategories = self.findCategories(in: self.feed.items ?? [])
                 self.subjects.categoriesUpdated.send(self.allCategories)
             }
 

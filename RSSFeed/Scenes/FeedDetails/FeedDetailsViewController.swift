@@ -34,9 +34,10 @@ class FeedDetailsViewController: UIViewController {
     }
     private let activityIndicator = UIActivityIndicatorView()
     private var collectionView: UICollectionView!
+    private let searchController = UISearchController()
 
     private var subscriptions = Set<AnyCancellable>()
-    private let input = PassthroughSubject<FeedDetailsViewModel.Input, Never>()
+    private let input = FeedDetailsViewModel.Input()
     var dataSource: DataSource!
     private let viewModel: FeedDetailsViewModel
 
@@ -59,6 +60,8 @@ class FeedDetailsViewController: UIViewController {
         super.viewDidLoad()
 
         navigationItem.largeTitleDisplayMode = .never
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.tintColor = .rsTint
 
         collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: UICollectionViewListCell.defaultReuseIdentifier)
         collectionView.delegate = self
@@ -77,7 +80,7 @@ class FeedDetailsViewController: UIViewController {
     }
 
     private func bindToViewModel() {
-        let output = viewModel.transform(input: input.eraseToAnyPublisher())
+        let output = viewModel.transform(input: input)
 
         output.feedUpdated
             .sink { [weak self] feed in
@@ -91,6 +94,10 @@ class FeedDetailsViewController: UIViewController {
                 guard let self else { return }
                 noStoriesLabel.isHidden = !items.isEmpty
                 applySnapshot(forItems: items)
+                if items.isEmpty == false, navigationItem.searchController == nil {
+                    // setting search controller after the data has been populated makes it hidden initially
+                    navigationItem.searchController = searchController
+                }
             }
             .store(in: &subscriptions)
 
@@ -154,15 +161,22 @@ extension FeedDetailsViewController: UICollectionViewDelegate {
         guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         switch item {
         case .category(let category):
-            input.send(.categoryTapped(category))
+            input.categoryTapped.send(category)
         case .feedItem(let id):
-            input.send(.feedItemTapped(id))
+            input.feedItemTapped.send(id)
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         guard let item = dataSource.itemIdentifier(for: indexPath), case .category(let category) = item else { return }
-        input.send(.categoryTapped(category))
+        input.categoryTapped.send(category)
+    }
+}
+
+// MARK: - UISearchResultsUpdating
+extension FeedDetailsViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        input.searchTextUpdated.send(searchController.searchBar.text ?? "")
     }
 }
 
@@ -204,7 +218,7 @@ extension FeedDetailsViewController {
         }
 
         let supplementaryRegistration = UICollectionView.SupplementaryRegistration<CategoryHeader>(elementKind: CategoryHeader.defaultElementKind) { header, elementKid, indexPath in
-            header.label.text = "Categories:"
+            header.label.text = "Categories"
         }
         dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
             return collectionView.dequeueConfiguredReusableSupplementary(using: supplementaryRegistration, for: indexPath)

@@ -58,7 +58,7 @@ extension FeedDetailsViewController {
         section.orthogonalScrollingBehavior = .continuous
 
         let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                heightDimension: .absolute(24))
+                                                heightDimension: .absolute(20))
         let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: CategoryHeader.defaultElementKind, alignment: .top)
         section.boundarySupplementaryItems = [sectionHeader]
 

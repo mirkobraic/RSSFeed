@@ -39,6 +39,15 @@ class FeedListViewModel {
     private var feedService: RssFeedService
     private var storageService: UserDefaultsService
 
+    private var sortOrder: SortOrder {
+        get {
+            return storageService.sortOrder
+        }
+        set {
+            storageService.sortOrder = newValue
+        }
+    }
+
     init(feedService: RssFeedService, storageService: UserDefaultsService) {
         self.feedService = feedService
         self.storageService = storageService
@@ -60,8 +69,11 @@ class FeedListViewModel {
                 feedService.deleteFeed(id: feedId)
             case .toggleFavorites(let feedId):
                 feedService.toggleFavorite(id: feedId)
+                if sortOrder == .favorites {
+                    subjects.feedsUpdated.send(getSortedFeeds())
+                }
             case .toggleSort(let sortOrder):
-                storageService.sortOrder = sortOrder
+                self.sortOrder = sortOrder
                 subjects.feedsUpdated.send(getSortedFeeds())
             }
         }
@@ -78,11 +90,10 @@ class FeedListViewModel {
     }
 
     func getCurrentSortOrder() -> SortOrder {
-        return storageService.sortOrder
+        return sortOrder
     }
 
     func getSortedFeeds() -> [RssFeed] {
-        let sortOrder = storageService.sortOrder
         let feeds = feedService.getFeeds()
 
         switch sortOrder {
