@@ -12,6 +12,7 @@ import UIKit
 class RSSParser: NSObject {
     private let networkService: NetworkService
     private var xmlParser: XMLParser!
+    private var feedType: FeedType?
     private var rssFeed: RssFeed!
     // The current path along the XML's elements. Ex. rss/channel/item/title
     private var currentElementPath: NSString = ""
@@ -48,75 +49,6 @@ class RSSParser: NSObject {
         } else {
             Logger.parsing.error("RSSParser error - parsing unsuccessful.")
             throw ParserError.parsingFailed
-        }
-    }
-
-    private func parseCharacters(_ value: String) {
-        guard let elementType = ElementType(rawValue: currentElementPath as String), let rssFeed else { return }
-        let currentItem = rssFeed.items?.last
-
-        switch elementType {
-        case .channelTitle:
-            rssFeed.title = (rssFeed.title ?? "") + value
-        case .channelImageUrl:
-            rssFeed.imageUrl = (rssFeed.imageUrl ?? "") + value
-        case .channelDescription:
-            rssFeed.description = (rssFeed.description ?? "") + value
-        case .channelItemTitle:
-            currentItem?.title = (currentItem?.title ?? "") + value
-        case .channelItemDescription:
-            if value.containsImgTag() {
-                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
-            } else {
-                currentItem?.description = (currentItem?.description ?? "") + value
-            }
-        case .channelItemContentEncoded:
-            if currentItem?.imageUrl == nil {
-                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
-            }
-        case .channelItemLink:
-            currentItem?.link = (currentItem?.link ?? "") + value
-        case .channelItemCategory:
-            if let endIndex = currentItem?.categories?.endIndex, endIndex > 0 {
-                currentItem?.categories?[endIndex - 1] += value
-            }
-        case .channelItemPublicationDate:
-            currentItem?.publicationDate = (currentItem?.publicationDate ?? "") + value
-
-         default:
-            break
-        }
-    }
-
-    private func parseElement(_ elementName: String, attributes: [String: String]) {
-        guard let elementType = ElementType(rawValue: currentElementPath as String), let rssFeed else { return }
-        let currentItem = rssFeed.items?.last
-
-        switch elementType {
-        case .channelItem:
-            if rssFeed.items == nil {
-                rssFeed.items = []
-            }
-            rssFeed.items?.append(RssItem())
-        case .channelItemCategory:
-            if rssFeed.items?.last?.categories == nil {
-                currentItem?.categories = []
-            }
-            rssFeed.items?.last?.categories?.append("")
-        case .channelItemMediaThumbnail:
-            if let imageUrl = attributes["url"] {
-                currentItem?.imageUrl = imageUrl
-            }
-        case .channelItemEnclosure:
-            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
-                currentItem?.imageUrl = imageUrl
-            }
-        case .channelItemMediaContent:
-            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
-                currentItem?.imageUrl = imageUrl
-            }
-        default:
-            break
         }
     }
 
@@ -165,6 +97,10 @@ extension RSSParser: XMLParserDelegate {
                 attributes attributeDict: [String: String] = [:]) {
 
         currentElementPath = currentElementPath.appendingPathComponent(elementName) as NSString
+        if feedType == nil {
+            let feedTypeRawValue = currentElementPath.components(separatedBy: "/").first ?? ""
+            feedType = FeedType(rawValue: feedTypeRawValue)
+        }
         parseElement(elementName, attributes: attributeDict)
     }
 
@@ -184,5 +120,95 @@ extension RSSParser: XMLParserDelegate {
 
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         parseCharacters(string)
+    }
+}
+
+// MARK: - Parsing
+extension RSSParser {
+    private func getCurrentElementType() -> ElementType? {
+        var elementType: ElementType?
+        switch feedType {
+        case .rss:
+            if let rssElementType = RssElementType(rawValue: currentElementPath as String) {
+                elementType = ElementType.from(rssType: rssElementType)
+            }
+        case .feed:
+            if let feedElementType = FeedElementType(rawValue: currentElementPath as String) {
+                elementType = ElementType.from(feedType: feedElementType)
+            }
+        case .none:
+            return nil
+        }
+
+        return elementType
+    }
+
+    private func parseCharacters(_ value: String) {
+        guard let rssFeed, let elementType = getCurrentElementType() else { return }
+        let currentItem = rssFeed.items?.last
+
+        switch elementType {
+        case .title:
+            rssFeed.title = (rssFeed.title ?? "") + value
+        case .imageUrl:
+            rssFeed.imageUrl = (rssFeed.imageUrl ?? "") + value
+        case .description:
+            rssFeed.description = (rssFeed.description ?? "") + value
+        case .itemTitle:
+            currentItem?.title = (currentItem?.title ?? "") + value
+        case .itemDescription:
+            if value.containsImgTag() {
+                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
+            } else {
+                currentItem?.description = (currentItem?.description ?? "") + value
+            }
+        case .itemContentEncoded:
+            if currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = value.replacingOccurrences(of: "\\", with: "").extractingUrlFromImgTag()
+            }
+        case .itemLink:
+            currentItem?.link = (currentItem?.link ?? "") + value
+        case .itemCategory:
+            if let endIndex = currentItem?.categories?.endIndex, endIndex > 0 {
+                currentItem?.categories?[endIndex - 1] += value
+            }
+        case .itemPublicationDate:
+            currentItem?.publicationDate = (currentItem?.publicationDate ?? "") + value
+
+         default:
+            break
+        }
+    }
+
+    private func parseElement(_ elementName: String, attributes: [String: String]) {
+        guard let rssFeed, let elementType = getCurrentElementType() else { return }
+        let currentItem = rssFeed.items?.last
+
+        switch elementType {
+        case .item:
+            if rssFeed.items == nil {
+                rssFeed.items = []
+            }
+            rssFeed.items?.append(RssItem())
+        case .itemCategory:
+            if rssFeed.items?.last?.categories == nil {
+                currentItem?.categories = []
+            }
+            rssFeed.items?.last?.categories?.append("")
+        case .itemMediaThumbnail:
+            if let imageUrl = attributes["url"] {
+                currentItem?.imageUrl = imageUrl
+            }
+        case .itemEnclosure:
+            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = imageUrl
+            }
+        case .itemMediaContent:
+            if let imageUrl = attributes["url"], currentItem?.imageUrl == nil {
+                currentItem?.imageUrl = imageUrl
+            }
+        default:
+            break
+        }
     }
 }
