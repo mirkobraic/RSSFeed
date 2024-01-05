@@ -9,6 +9,7 @@ import UIKit
 
 struct FeedItemCellContentConfiguration: UIContentConfiguration, Hashable {
     var title: String?
+    var date: String?
     var description: String?
     var attributedDescription: NSAttributedString?
     var imageUrl: URL?

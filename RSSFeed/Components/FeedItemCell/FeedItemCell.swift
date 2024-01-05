@@ -16,6 +16,7 @@ class FeedItemCell: UICollectionViewCell {
 
         var contentConfig = FeedItemCellContentConfiguration().updated(for: state)
         contentConfig.title = item.title
+        contentConfig.date = item.formattedDate
         if let attributedDescription = item.attributedDescription {
             contentConfig.attributedDescription = attributedDescription
         } else {

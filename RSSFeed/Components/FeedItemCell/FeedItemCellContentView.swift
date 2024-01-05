@@ -27,12 +27,14 @@ class FeedItemCellContentView: UIView, UIContentView {
     private let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 16, weight: .bold)
         $0.numberOfLines = 0
-        $0.setContentHuggingPriority(.required, for: .vertical)
+    }
+    private let dateLabel = UILabel().then {
+        $0.font = .systemFont(ofSize: 12)
+        $0.textColor = .secondaryLabel
     }
     private let descriptionLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 12)
         $0.numberOfLines = 0
-        $0.setContentHuggingPriority(.required, for: .vertical)
     }
 
     init(configuration: FeedItemCellContentConfiguration) {
@@ -51,6 +53,7 @@ class FeedItemCellContentView: UIView, UIContentView {
 
         addSubview(imageView)
         addSubview(titleLabel)
+        addSubview(dateLabel)
         addSubview(descriptionLabel)
 
         imageView.snp.makeConstraints { make in
@@ -63,9 +66,14 @@ class FeedItemCellContentView: UIView, UIContentView {
             make.top.equalTo(imageView.snp.bottom).offset(10)
         }
 
-        descriptionLabel.snp.makeConstraints { make in
+        dateLabel.snp.makeConstraints { make in
             make.leading.trailing.equalTo(titleLabel)
             make.top.equalTo(titleLabel.snp.bottom).offset(5)
+        }
+
+        descriptionLabel.snp.makeConstraints { make in
+            make.leading.trailing.equalTo(titleLabel)
+            make.top.equalTo(dateLabel.snp.bottom).offset(10)
             make.bottom.equalToSuperview().inset(10).priority(.high)
         }
     }
@@ -76,7 +84,7 @@ class FeedItemCellContentView: UIView, UIContentView {
 
         titleLabel.text = configuration.title
         titleLabel.font = configuration.isSeen ? .systemFont(ofSize: 16, weight: .regular) : .systemFont(ofSize: 16, weight: .bold)
-
+        dateLabel.text = configuration.date
         if let attributedDescription = configuration.attributedDescription {
             descriptionLabel.attributedText = attributedDescription
         } else {

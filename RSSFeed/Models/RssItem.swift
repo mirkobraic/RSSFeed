@@ -18,4 +18,14 @@ class RssItem: Identifiable {
     var imageUrl: String?
 
     var isSeen = false
+
+    var formattedDate: String? {
+        guard let publicationDate else { return nil }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EE, dd MMM yyyy HH:mm:ss Z"
+        guard let date = dateFormatter.date(from: publicationDate) else { return publicationDate }
+        dateFormatter.dateFormat = "EE, dd MMM yyyy"
+        return dateFormatter.string(from: date)
+    }
 }
